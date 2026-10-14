@@ -138,13 +138,15 @@ def infer_function_signature_from_sources(
         return parsed
 
     # 1. Search in starter_codes
-    if starter_codes:
+    if starter_codes and isinstance(starter_codes, dict):
         if not fn_name:
-            fn_name = starter_codes.get("function_name")
+            raw_fn = starter_codes.get("function_name")
+            if isinstance(raw_fn, str):
+                fn_name = raw_fn
         candidates = [lang_str] + [k for k in starter_codes.keys() if k != lang_str and k not in ("function_name", "slug")]
         for c_lang in candidates:
             code = starter_codes.get(c_lang, "")
-            if not code:
+            if not code or not isinstance(code, str):
                 continue
             # Python pattern
             m_py = re.search(r"def\s+([a-zA-Z_]\w*)\s*\((.*?)\)", code, re.DOTALL)
@@ -177,7 +179,7 @@ def infer_function_signature_from_sources(
                     return fn_name, params
 
     # 2. Search in user_source if needed
-    if user_source:
+    if user_source and isinstance(user_source, str):
         m_py = re.search(r"def\s+([a-zA-Z_]\w*)\s*\((.*?)\)", user_source, re.DOTALL)
         if m_py:
             if not fn_name:
@@ -194,8 +196,11 @@ def infer_function_signature_from_sources(
                     if not params:
                         params = _split_params(m_js.group(4))
 
-    if not fn_name and starter_codes:
-        fn_name = extract_function_name(starter_codes, lang_str)
+    if not fn_name and starter_codes and isinstance(starter_codes, dict):
+        try:
+            fn_name = extract_function_name(starter_codes, lang_str)
+        except Exception:
+            fn_name = None
 
     return fn_name or "solution", params
 

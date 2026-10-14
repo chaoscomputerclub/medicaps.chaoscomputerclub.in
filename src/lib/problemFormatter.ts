@@ -92,22 +92,31 @@ export function safeParseJson(raw: any): any {
   try {
     return JSON.parse(trimmed);
   } catch {
-    // If not valid JSON, check if it's multiple JSON lines
-    if (trimmed.includes("\n")) {
-      const lines = trimmed.split("\n").map((l) => l.trim()).filter(Boolean);
-      try {
-        return lines.map((line) => {
-          try {
-            return JSON.parse(line);
-          } catch {
-            return line;
-          }
-        });
-      } catch {
-        return trimmed;
+    // Attempt single-quote normalized JSON (e.g. Python dict string)
+    try {
+      return JSON.parse(trimmed.replace(/'/g, '"'));
+    } catch {
+      // If not valid JSON, check if it's multiple JSON lines
+      if (trimmed.includes("\n")) {
+        const lines = trimmed.split("\n").map((l) => l.trim()).filter(Boolean);
+        try {
+          return lines.map((line) => {
+            try {
+              return JSON.parse(line);
+            } catch {
+              try {
+                return JSON.parse(line.replace(/'/g, '"'));
+              } catch {
+                return line;
+              }
+            }
+          });
+        } catch {
+          return trimmed;
+        }
       }
+      return trimmed;
     }
-    return trimmed;
   }
 }
 

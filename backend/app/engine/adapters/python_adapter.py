@@ -178,7 +178,10 @@ if __name__ == '__main__':
             else:
                 # 2. Try JSON parse
                 try:
-                    parsed = json.loads(raw_trimmed)
+                    try:
+                        parsed = json.loads(raw_trimmed)
+                    except Exception:
+                        parsed = json.loads(raw_trimmed.replace("'", '"'))
                     if isinstance(parsed, dict):
                         for k in ('raw', 'input', 'args'):
                             if k in parsed:
@@ -187,7 +190,10 @@ if __name__ == '__main__':
                                     try:
                                         inner = json.loads(inner)
                                     except Exception:
-                                        pass
+                                        try:
+                                            inner = json.loads(inner.replace("'", '"'))
+                                        except Exception:
+                                            pass
                                 parsed = inner
                                 break
                     if isinstance(parsed, dict) and param_names:
@@ -196,7 +202,9 @@ if __name__ == '__main__':
                         else:
                             args = list(parsed.values())
                     elif isinstance(parsed, list):
-                        if len(param_names) == 1 and len(parsed) != 1:
+                        if len(param_names) == 1 and len(parsed) == 1 and isinstance(parsed[0], list):
+                            args = [parsed[0]]
+                        elif len(param_names) == 1 and len(parsed) != 1:
                             args = [parsed]
                         elif len(parsed) == len(param_names):
                             args = parsed

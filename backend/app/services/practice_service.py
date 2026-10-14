@@ -32,7 +32,7 @@ from app.core.config import settings
 from app.core.redis import get_redis_client
 from app.engine.contracts import EvaluationConfig, FunctionSignature
 from app.engine.enums import ComparisonMode, SubmissionMode, Verdict
-from app.engine.binder import InputBindingError
+from app.engine.binder import InputBinder, InputBindingError
 from app.engine.judge import JudgeEngine
 from app.engine.adapters import OutputEvaluator
 from app.engine.execution_router import ExecutionRouter
@@ -368,20 +368,27 @@ class PracticeService:
 
         fn_sig_dict = problem.function_signature or {}
         if not fn_sig_dict or (isinstance(fn_sig_dict, dict) and not fn_sig_dict.get("name") and not fn_sig_dict.get("parameters")):
-            if str(problem.execution_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT") and problem.starter_code:
-                from app.engine.build_plan import infer_function_signature_from_sources
-                inferred_fn, inferred_params = infer_function_signature_from_sources(
-                    starter_codes=problem.starter_code,
-                    lang_str="python",
-                )
-                if inferred_fn:
-                    fn_sig_dict = {
-                        "name": inferred_fn,
-                        "function_name": inferred_fn,
-                        "class_name": "Solution",
-                        "parameters": [{"name": p[0], "type": p[1] if p[1] != "object" else "any"} for p in inferred_params],
-                        "return_type": "any",
-                    }
+            if str(problem.execution_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT"):
+                starter_dict = getattr(problem, "starter_code", None)
+                if not isinstance(starter_dict, dict):
+                    starter_dict = getattr(problem, "starter_codes", None)
+                if isinstance(starter_dict, dict) and any(isinstance(v, str) for v in starter_dict.values()):
+                    try:
+                        from app.engine.build_plan import infer_function_signature_from_sources
+                        inferred_fn, inferred_params = infer_function_signature_from_sources(
+                            starter_codes=starter_dict,
+                            lang_str="python",
+                        )
+                        if inferred_fn:
+                            fn_sig_dict = {
+                                "name": inferred_fn,
+                                "function_name": inferred_fn,
+                                "class_name": "Solution",
+                                "parameters": [{"name": p[0], "type": p[1] if p[1] != "object" else "any"} for p in inferred_params],
+                                "return_type": "any",
+                            }
+                    except Exception:
+                        pass
 
         return {
             "id": problem.id,
@@ -454,38 +461,85 @@ class PracticeService:
             ).order_by(ProblemTestCase.order.asc(), ProblemTestCase.created_at.asc())
             samples = (await db.scalars(fallback_stmt)).all()
 
-        raw_cases = [
-            {
+        raw_cases = []
+        for vc in samples:
+            clean_inp = vc.input_data
+            if clean_inp is not None:
+                parsed_inp = InputBinder.parse_raw_input(clean_inp)
+                if isinstance(parsed_inp, dict) and "raw" in parsed_inp and len(parsed_inp) == 1:
+                    clean_inp = parsed_inp["raw"]
+                elif isinstance(parsed_inp, dict) and "input" in parsed_inp and len(parsed_inp) == 1:
+                    clean_inp = parsed_inp["input"]
+                elif isinstance(parsed_inp, (list, dict)):
+                    clean_inp = parsed_inp
+            raw_cases.append({
                 "testcase_id": vc.testcase_id,
                 "name": f"Case {vc.order}" if vc.order else vc.testcase_id,
-                "input": vc.input_data,
+                "input": clean_inp,
                 "expected_output": vc.expected_output,
                 "explanation": vc.explanation,
                 "weight": vc.weight,
                 "is_hidden": False,
-            }
-            for vc in samples
-        ]
+            })
 
         raw_sig = getattr(problem, "function_signature", None)
-        if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("parameters")):
+        if isinstance(raw_sig, str):
+            try:
+                raw_sig = json.loads(raw_sig)
+            except Exception:
+                pass
+        if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("function_name") or raw_sig.get("parameters")):
             try:
                 fn_sig = FunctionSignature(**raw_sig)
             except Exception:
                 pass
-        raw_eval = getattr(problem, "evaluation_config", None)
-        if raw_eval and isinstance(raw_eval, dict):
-            try:
-                eval_cfg = EvaluationConfig(**raw_eval)
-            except Exception:
-                pass
-        if not exec_mode:
-            exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
 
         try:
             lang_enum = LanguageRegistry.normalize(language)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
+
+        # Fallback: Infer function signature from starter codes if missing or incomplete
+        if not fn_sig or not getattr(fn_sig, "name", "") or len(fn_sig.parameters) == 0:
+            starter_dict = getattr(problem, "starter_code", None)
+            if not isinstance(starter_dict, dict):
+                starter_dict = getattr(problem, "starter_codes", None)
+            if isinstance(starter_dict, dict) and any(isinstance(v, str) for v in starter_dict.values()):
+                try:
+                    from app.engine.build_plan import infer_function_signature_from_sources
+                    inferred_fn, inferred_params = infer_function_signature_from_sources(
+                        starter_codes=starter_dict,
+                        lang_str=lang_enum.value,
+                        user_source=code,
+                    )
+                    if inferred_fn:
+                        from app.engine.contracts import ParameterDefinition
+                        fn_sig = FunctionSignature(
+                            class_name="Solution",
+                            name=inferred_fn,
+                            function_name=inferred_fn,
+                            parameters=[ParameterDefinition(name=p[0], type=p[1]) for p in inferred_params],
+                            return_type="any",
+                        )
+                except Exception:
+                    pass
+
+        raw_eval = getattr(problem, "evaluation_config", None)
+        if isinstance(raw_eval, str):
+            try:
+                raw_eval = json.loads(raw_eval)
+            except Exception:
+                pass
+        if raw_eval and isinstance(raw_eval, dict):
+            try:
+                eval_cfg = EvaluationConfig(**raw_eval)
+            except Exception:
+                pass
+
+        if not exec_mode or exec_mode == "FUNCTION":
+            exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
+        elif fn_sig and exec_mode != "FULL_PROGRAM":
+            exec_mode = "FUNCTION"
 
         is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT")
         adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
@@ -504,7 +558,11 @@ class PracticeService:
                     stdin_payload = ""
                     tc_binding_errors[i] = str(e)
             else:
-                stdin_payload = str(inp) if inp is not None else ""
+                if isinstance(inp, (dict, list)):
+                    parsed_raw = InputBinder.parse_raw_input(inp)
+                    stdin_payload = json.dumps(parsed_raw, ensure_ascii=False)
+                else:
+                    stdin_payload = str(inp) if inp is not None else ""
 
             clean_exp_out = exp_out
             if isinstance(clean_exp_out, str):
@@ -793,51 +851,91 @@ class PracticeService:
             vault_cases = (await db.scalars(fallback_stmt)).all()
 
         # Full suite: sample + hidden
-        samples = [
-            {
+        samples = []
+        hidden = []
+        for vc in vault_cases:
+            clean_inp = vc.input_data
+            if clean_inp is not None:
+                parsed_inp = InputBinder.parse_raw_input(clean_inp)
+                if isinstance(parsed_inp, dict) and "raw" in parsed_inp and len(parsed_inp) == 1:
+                    clean_inp = parsed_inp["raw"]
+                elif isinstance(parsed_inp, dict) and "input" in parsed_inp and len(parsed_inp) == 1:
+                    clean_inp = parsed_inp["input"]
+                elif isinstance(parsed_inp, (list, dict)):
+                    clean_inp = parsed_inp
+            tc_dict = {
                 "testcase_id": vc.testcase_id,
-                "name": f"Case {vc.order}" if vc.order else vc.testcase_id,
-                "input": vc.input_data,
+                "name": f"{'Hidden' if vc.is_hidden else 'Case'} {vc.order}" if vc.order else vc.testcase_id,
+                "input": clean_inp,
                 "expected_output": vc.expected_output,
                 "explanation": vc.explanation,
                 "weight": vc.weight,
-                "is_hidden": False,
+                "is_hidden": bool(vc.is_hidden),
             }
-            for vc in vault_cases if not vc.is_hidden
-        ]
-        hidden = [
-            {
-                "testcase_id": vc.testcase_id,
-                "name": f"Hidden {vc.order}" if vc.order else vc.testcase_id,
-                "input": vc.input_data,
-                "expected_output": vc.expected_output,
-                "explanation": vc.explanation,
-                "weight": vc.weight,
-                "is_hidden": True,
-            }
-            for vc in vault_cases if vc.is_hidden
-        ]
+            if vc.is_hidden:
+                hidden.append(tc_dict)
+            else:
+                samples.append(tc_dict)
         raw_cases = samples + hidden
 
         raw_sig = getattr(problem, "function_signature", None)
-        if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("parameters")):
+        if isinstance(raw_sig, str):
+            try:
+                raw_sig = json.loads(raw_sig)
+            except Exception:
+                pass
+        if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("function_name") or raw_sig.get("parameters")):
             try:
                 fn_sig = FunctionSignature(**raw_sig)
             except Exception:
                 pass
-        raw_eval = getattr(problem, "evaluation_config", None)
-        if raw_eval and isinstance(raw_eval, dict):
-            try:
-                eval_cfg = EvaluationConfig(**raw_eval)
-            except Exception:
-                pass
-        if not exec_mode:
-            exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
 
         try:
             lang_enum = LanguageRegistry.normalize(language)
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
+
+        # Fallback: Infer function signature from starter codes if missing or incomplete
+        if not fn_sig or not getattr(fn_sig, "name", "") or len(fn_sig.parameters) == 0:
+            starter_dict = getattr(problem, "starter_code", None)
+            if not isinstance(starter_dict, dict):
+                starter_dict = getattr(problem, "starter_codes", None)
+            if isinstance(starter_dict, dict) and any(isinstance(v, str) for v in starter_dict.values()):
+                try:
+                    from app.engine.build_plan import infer_function_signature_from_sources
+                    inferred_fn, inferred_params = infer_function_signature_from_sources(
+                        starter_codes=starter_dict,
+                        lang_str=lang_enum.value,
+                        user_source=code,
+                    )
+                    if inferred_fn:
+                        from app.engine.contracts import ParameterDefinition
+                        fn_sig = FunctionSignature(
+                            class_name="Solution",
+                            name=inferred_fn,
+                            function_name=inferred_fn,
+                            parameters=[ParameterDefinition(name=p[0], type=p[1]) for p in inferred_params],
+                            return_type="any",
+                        )
+                except Exception:
+                    pass
+
+        raw_eval = getattr(problem, "evaluation_config", None)
+        if isinstance(raw_eval, str):
+            try:
+                raw_eval = json.loads(raw_eval)
+            except Exception:
+                pass
+        if raw_eval and isinstance(raw_eval, dict):
+            try:
+                eval_cfg = EvaluationConfig(**raw_eval)
+            except Exception:
+                pass
+
+        if not exec_mode or exec_mode == "FUNCTION":
+            exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
+        elif fn_sig and exec_mode != "FULL_PROGRAM":
+            exec_mode = "FUNCTION"
 
         is_fn_mode = str(exec_mode).upper() not in ("FULL_PROGRAM", "STDIN_STDOUT")
         adapter = LanguageRegistry.get_adapter(lang_enum) if is_fn_mode else None
@@ -857,7 +955,11 @@ class PracticeService:
                     stdin_payload = ""
                     tc_binding_errors[i] = str(e)
             else:
-                stdin_payload = str(inp) if inp is not None else ""
+                if isinstance(inp, (dict, list)):
+                    parsed_raw = InputBinder.parse_raw_input(inp)
+                    stdin_payload = json.dumps(parsed_raw, ensure_ascii=False)
+                else:
+                    stdin_payload = str(inp) if inp is not None else ""
 
             clean_exp_out = exp_out
             if isinstance(clean_exp_out, str):

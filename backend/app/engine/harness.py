@@ -35,6 +35,8 @@ def extract_function_name(starter_codes: Dict[str, str], language: str) -> Optio
     """
     lang = (language or "").lower().strip()
     # Normalise language key
+    if not isinstance(starter_codes, dict):
+        return None
     lang_map = {
         "py": "python", "python3": "python",
         "js": "javascript", "nodejs": "javascript", "node": "javascript",
@@ -43,11 +45,17 @@ def extract_function_name(starter_codes: Dict[str, str], language: str) -> Optio
     }
     lang = lang_map.get(lang, lang)
 
-    candidates = [lang] + [k for k in starter_codes if k != lang]
+    try:
+        candidates = [lang] + [k for k in starter_codes if k != lang]
+    except Exception:
+        return None
 
     for key in candidates:
-        code = starter_codes.get(key, "")
-        if not code:
+        try:
+            code = starter_codes.get(key, "")
+        except Exception:
+            continue
+        if not isinstance(code, str) or not code:
             continue
         name = _parse_fn_name(code, key)
         if name:
@@ -57,6 +65,8 @@ def extract_function_name(starter_codes: Dict[str, str], language: str) -> Optio
 
 def _parse_fn_name(code: str, lang: str) -> Optional[str]:
     """Parse the primary function/method name from a language-specific starter code."""
+    if not isinstance(code, str) or not code:
+        return None
     patterns: List[str] = []
 
     if lang == "python":

@@ -159,14 +159,30 @@ class TypeScriptAdapter(BaseLanguageAdapter):
                 }} else {{
                     // 2. Try JSON parse
                     try {{
-                        let parsed = JSON.parse(rawTrimmed);
+                        let parsed = null;
+                        try {{
+                            parsed = JSON.parse(rawTrimmed);
+                        }} catch(e_json) {{
+                            try {{
+                                parsed = JSON.parse(rawTrimmed.replace(/'/g, '"'));
+                            }} catch(e_norm) {{
+                                parsed = null;
+                            }}
+                        }}
+                        if (parsed === null) {{
+                            throw new Error("JSON parse fallback");
+                        }}
                         if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {{
                             if ('raw' in parsed || 'input' in parsed || 'args' in parsed) {{
                                 const inner = parsed.raw !== undefined ? parsed.raw : (parsed.input !== undefined ? parsed.input : parsed.args);
                                 try {{
                                     parsed = typeof inner === 'string' ? JSON.parse(inner) : inner;
                                 }} catch(e) {{
-                                    parsed = inner;
+                                    try {{
+                                        parsed = typeof inner === 'string' ? JSON.parse(inner.replace(/'/g, '"')) : inner;
+                                    }} catch(e_inner) {{
+                                        parsed = inner;
+                                    }}
                                 }}
                             }}
                         }}
@@ -181,7 +197,9 @@ class TypeScriptAdapter(BaseLanguageAdapter):
                                 args = paramNames.map(p => parsed[p] !== undefined ? parsed[p] : Object.values(parsed)[0]);
                             }}
                         }} else if (Array.isArray(parsed)) {{
-                            if (paramNames.length === 1 && parsed.length !== 1) {{
+                            if (paramNames.length === 1 && parsed.length === 1 && Array.isArray(parsed[0])) {{
+                                args = [parsed[0]];
+                            }} else if (paramNames.length === 1 && parsed.length !== 1) {{
                                 args = [parsed];
                             }} else if (parsed.length === paramNames.length) {{
                                 args = parsed;

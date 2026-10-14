@@ -118,15 +118,30 @@ class ContestExecutionService:
             master_prob = await db.get(Problem, master_prob_id)
             if master_prob:
                 raw_sig = getattr(problem, "function_signature", None)
-                if not raw_sig or (isinstance(raw_sig, dict) and not raw_sig.get("name") and not raw_sig.get("parameters")):
+                if isinstance(raw_sig, str):
+                    try:
+                        raw_sig = json.loads(raw_sig)
+                    except Exception:
+                        pass
+                if not raw_sig or (isinstance(raw_sig, dict) and not raw_sig.get("name") and not raw_sig.get("function_name") and not raw_sig.get("parameters")):
                     raw_sig = master_prob.function_signature
-                if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("parameters")):
+                    if isinstance(raw_sig, str):
+                        try:
+                            raw_sig = json.loads(raw_sig)
+                        except Exception:
+                            pass
+                if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("function_name") or raw_sig.get("parameters")):
                     try:
                         fn_sig = FunctionSignature(**raw_sig)
                     except Exception:
                         pass
                 raw_eval = getattr(problem, "evaluation_config", None) or master_prob.evaluation_config
-                if raw_eval:
+                if isinstance(raw_eval, str):
+                    try:
+                        raw_eval = json.loads(raw_eval)
+                    except Exception:
+                        pass
+                if raw_eval and isinstance(raw_eval, dict):
                     try:
                         eval_cfg = EvaluationConfig(**raw_eval)
                     except Exception:
@@ -143,15 +158,49 @@ class ContestExecutionService:
 
         if not fn_sig:
             raw_sig = getattr(problem, "function_signature", None)
-            if raw_sig:
+            if isinstance(raw_sig, str):
+                try:
+                    raw_sig = json.loads(raw_sig)
+                except Exception:
+                    pass
+            if raw_sig and isinstance(raw_sig, dict) and (raw_sig.get("name") or raw_sig.get("function_name") or raw_sig.get("parameters")):
                 try:
                     fn_sig = FunctionSignature(**raw_sig)
                 except Exception:
                     pass
 
+        # If fn_sig still missing, infer from starter codes
+        if not fn_sig or not getattr(fn_sig, "name", "") or len(fn_sig.parameters) == 0:
+            starter_dict = getattr(problem, "starter_codes", None)
+            if not isinstance(starter_dict, dict):
+                starter_dict = getattr(problem, "starter_code", None)
+            if isinstance(starter_dict, dict) and any(isinstance(v, str) for v in starter_dict.values()):
+                try:
+                    from app.engine.build_plan import infer_function_signature_from_sources
+                    inferred_fn, inferred_params = infer_function_signature_from_sources(
+                        starter_codes=starter_dict,
+                        lang_str="python",
+                    )
+                    if inferred_fn:
+                        from app.engine.contracts import ParameterDefinition
+                        fn_sig = FunctionSignature(
+                            class_name="Solution",
+                            name=inferred_fn,
+                            function_name=inferred_fn,
+                            parameters=[ParameterDefinition(name=p[0], type=p[1]) for p in inferred_params],
+                            return_type="any",
+                        )
+                except Exception:
+                    pass
+
         if not eval_cfg:
             raw_eval = getattr(problem, "evaluation_config", None)
-            if raw_eval:
+            if isinstance(raw_eval, str):
+                try:
+                    raw_eval = json.loads(raw_eval)
+                except Exception:
+                    pass
+            if raw_eval and isinstance(raw_eval, dict):
                 try:
                     eval_cfg = EvaluationConfig(**raw_eval)
                 except Exception:
@@ -162,8 +211,10 @@ class ContestExecutionService:
             master_prob = await db.get(Problem, master_prob_id)
             if master_prob:
                 exec_mode = getattr(master_prob, "execution_mode", None)
-        if not exec_mode:
+        if not exec_mode or exec_mode == "FUNCTION":
             exec_mode = "FUNCTION" if fn_sig else "STDIN_STDOUT"
+        elif fn_sig and exec_mode != "FULL_PROGRAM":
+            exec_mode = "FUNCTION"
 
         return fn_sig, eval_cfg, visible_cases, hidden_cases, time_limit, memory_limit, exec_mode
 
@@ -261,7 +312,11 @@ class ContestExecutionService:
                         stdin_payload = ""
                         tc_binding_errors[i] = str(e)
                 else:
-                    stdin_payload = str(inp)
+                    if isinstance(inp, (dict, list)):
+                        parsed_raw = InputBinder.parse_raw_input(inp)
+                        stdin_payload = json.dumps(parsed_raw, ensure_ascii=False)
+                    else:
+                        stdin_payload = str(inp) if inp is not None else ""
 
                 exp_out = s.get("expected_output") if s.get("expected_output") is not None else s.get("output", "")
                 tcs.append(
@@ -570,7 +625,11 @@ class ContestExecutionService:
                     stdin_payload = ""
                     tc_binding_errors[i] = str(e)
             else:
-                stdin_payload = str(inp)
+                if isinstance(inp, (dict, list)):
+                    parsed_raw = InputBinder.parse_raw_input(inp)
+                    stdin_payload = json.dumps(parsed_raw, ensure_ascii=False)
+                else:
+                    stdin_payload = str(inp) if inp is not None else ""
 
             exp_out = s.get("expected_output") if s.get("expected_output") is not None else s.get("output", "")
             clean_exp_out = exp_out
