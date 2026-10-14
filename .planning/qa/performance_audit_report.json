@@ -1,29 +1,29 @@
 {
-  "timestamp": "2026-10-06T06:46:41.297Z",
-  "apiBase": "https://medicaps-api.chaoscomputerclub.in/api",
-  "grade": "F",
-  "passRate": 54,
+  "timestamp": "2026-10-14T08:28:21.016Z",
+  "apiBase": "https://medicaps.chaoscomputerclub.in/api",
+  "grade": "B",
+  "passRate": 85,
   "summary": {
     "totalChecks": 13,
-    "passedChecks": 7,
-    "failedChecks": 6
+    "passedChecks": 11,
+    "failedChecks": 2
   },
   "modules": {
     "frontend": {
       "status": "COMPLETE",
-      "fileCount": 46,
-      "totalRawBytes": 6643577,
-      "totalGzipBytes": 1773256,
-      "coreUIRawBytes": 463487,
-      "coreUIGzipBytes": 136724,
+      "fileCount": 50,
+      "totalRawBytes": 6723954,
+      "totalGzipBytes": 1794119,
+      "coreUIRawBytes": 480332,
+      "coreUIGzipBytes": 141453,
       "workerRawBytes": 0,
-      "monacoRawBytes": 4373559,
+      "monacoRawBytes": 4373567,
       "assets": [
         {
-          "name": "vendor-monaco-Bg5mSXG_.js",
+          "name": "vendor-monaco-Dm5xG-CN.js",
           "category": "monaco_editor",
-          "rawBytes": 4373559,
-          "gzipBytes": 1107226
+          "rawBytes": 4373567,
+          "gzipBytes": 1107231
         },
         {
           "name": "vendor-charts-2fYnrJmY.js",
@@ -44,10 +44,10 @@
           "gzipBytes": 77608
         },
         {
-          "name": "index-CRviHcob.css",
+          "name": "index-DFaQ7g_5.css",
           "category": "css",
-          "rawBytes": 184568,
-          "gzipBytes": 27231
+          "rawBytes": 183486,
+          "gzipBytes": 28486
         },
         {
           "name": "vendor-monaco-Dl25h2Qx.css",
@@ -62,28 +62,28 @@
           "gzipBytes": 69091
         },
         {
-          "name": "index-C_u95JGD.js",
+          "name": "index-BXn8whlt.js",
           "category": "core_ui",
-          "rawBytes": 129239,
-          "gzipBytes": 33367
+          "rawBytes": 138105,
+          "gzipBytes": 36099
         },
         {
-          "name": "vendor-radix-pIFC2T30.js",
+          "name": "vendor-radix-Xc-Ssrmr.js",
           "category": "core_ui",
-          "rawBytes": 88192,
-          "gzipBytes": 25749
+          "rawBytes": 96171,
+          "gzipBytes": 27746
         },
         {
-          "name": "ContestArenaPage-ejKbcRnI.js",
+          "name": "ContestArenaPage-DsvsWvna.js",
           "category": "route_page",
-          "rawBytes": 73339,
-          "gzipBytes": 15101
+          "rawBytes": 80001,
+          "gzipBytes": 16553
         },
         {
-          "name": "skeletons-BGBdhzDC.js",
+          "name": "skeletons-BjG8yxdE.js",
           "category": "js_chunk",
-          "rawBytes": 65838,
-          "gzipBytes": 11241
+          "rawBytes": 70466,
+          "gzipBytes": 12013
         },
         {
           "name": "inter-latin-wght-normal-Dx4kXJAl.woff2",
@@ -92,58 +92,64 @@
           "gzipBytes": 48254
         },
         {
-          "name": "ContestsHubPage-D4CB8GAE.js",
+          "name": "ProfilePage-BjI_wyyh.js",
           "category": "route_page",
-          "rawBytes": 46602,
-          "gzipBytes": 11159
+          "rawBytes": 45644,
+          "gzipBytes": 11265
         },
         {
-          "name": "SettingsPage-DBCqRwLB.js",
+          "name": "ContestsHubPage-C08dMKFF.js",
           "category": "route_page",
-          "rawBytes": 27900,
-          "gzipBytes": 8086
+          "rawBytes": 44733,
+          "gzipBytes": 10983
         },
         {
-          "name": "ContestOverviewPage-BrPayEtJ.js",
+          "name": "SettingsPage-q_Qq0lle.js",
           "category": "route_page",
-          "rawBytes": 27048,
-          "gzipBytes": 6446
+          "rawBytes": 29601,
+          "gzipBytes": 8622
         },
         {
-          "name": "AssessmentWorkspacePage-Cq2cXUBu.js",
+          "name": "ContestOverviewPage-BFjitsh-.js",
           "category": "route_page",
-          "rawBytes": 25777,
-          "gzipBytes": 6450
+          "rawBytes": 28203,
+          "gzipBytes": 6601
         },
         {
-          "name": "ProfilePage-0nTKsaMv.js",
+          "name": "AssessmentWorkspacePage-DcRh83vz.js",
           "category": "route_page",
-          "rawBytes": 25424,
-          "gzipBytes": 7537
+          "rawBytes": 26652,
+          "gzipBytes": 6661
         },
         {
-          "name": "ContestSummaryPage-_83rFKsK.js",
+          "name": "ContestSummaryPage-CGho46r3.js",
           "category": "route_page",
-          "rawBytes": 23942,
-          "gzipBytes": 6043
+          "rawBytes": 24412,
+          "gzipBytes": 6200
         },
         {
-          "name": "vendor-icons-R5uXiEI3.js",
+          "name": "DashboardPage-kfPPtPWm.js",
+          "category": "route_page",
+          "rawBytes": 20337,
+          "gzipBytes": 5294
+        },
+        {
+          "name": "vendor-icons-DfLkcQJJ.js",
           "category": "js_chunk",
-          "rawBytes": 19192,
-          "gzipBytes": 6507
+          "rawBytes": 19016,
+          "gzipBytes": 6416
         },
         {
-          "name": "ContestLobbyPage-DuhCuZVy.js",
+          "name": "ContestLobbyPage-DnLUAnjG.js",
           "category": "route_page",
-          "rawBytes": 17651,
-          "gzipBytes": 4114
+          "rawBytes": 18497,
+          "gzipBytes": 4200
         },
         {
-          "name": "DashboardPage-DrpkMeG3.js",
+          "name": "MyContestsPage-Bkf4aKS3.js",
           "category": "route_page",
-          "rawBytes": 17647,
-          "gzipBytes": 4840
+          "rawBytes": 16354,
+          "gzipBytes": 4839
         },
         {
           "name": "vendor-qr-DNEe277Q.js",
@@ -152,10 +158,16 @@
           "gzipBytes": 5986
         },
         {
-          "name": "MyContestsPage-DzpHBDkN.js",
+          "name": "PracticePage-dVuMOkfH.js",
           "category": "route_page",
-          "rawBytes": 16137,
-          "gzipBytes": 4844
+          "rawBytes": 13476,
+          "gzipBytes": 4002
+        },
+        {
+          "name": "dialog-B1aZ3IWj.js",
+          "category": "js_chunk",
+          "rawBytes": 13323,
+          "gzipBytes": 3352
         },
         {
           "name": "vendor-redux-BgEy-SS8.js",
@@ -164,76 +176,76 @@
           "gzipBytes": 4956
         },
         {
-          "name": "LeaderboardPage-BRxt52qr.js",
+          "name": "ContestOfflinePage-sg60Xm6n.js",
           "category": "route_page",
-          "rawBytes": 10857,
-          "gzipBytes": 3536
+          "rawBytes": 10957,
+          "gzipBytes": 3115
         },
         {
-          "name": "TermsPage-K8IlmCku.js",
+          "name": "LeaderboardPage-Cj6S4xxI.js",
           "category": "route_page",
-          "rawBytes": 10635,
-          "gzipBytes": 3488
+          "rawBytes": 10949,
+          "gzipBytes": 3555
         },
         {
-          "name": "ContestOfflinePage-INvx_qG1.js",
+          "name": "ContestResultsPage-DGhg9qxV.js",
           "category": "route_page",
-          "rawBytes": 10283,
-          "gzipBytes": 3054
+          "rawBytes": 10854,
+          "gzipBytes": 3199
         },
         {
-          "name": "ContestResultsPage-BC8cMzZb.js",
+          "name": "TermsPage-DP8Mzl6A.js",
           "category": "route_page",
-          "rawBytes": 10283,
-          "gzipBytes": 3068
+          "rawBytes": 10812,
+          "gzipBytes": 3547
         },
         {
-          "name": "ContestQualifiedPage-C_-JrywB.js",
+          "name": "ContestQualifiedPage-D9dRZeLn.js",
           "category": "route_page",
-          "rawBytes": 9733,
-          "gzipBytes": 3240
+          "rawBytes": 10524,
+          "gzipBytes": 3321
         },
         {
-          "name": "avatar-BvaKbqRU.js",
+          "name": "avatar-CyJkPlP8.js",
           "category": "js_chunk",
-          "rawBytes": 9537,
-          "gzipBytes": 2990
+          "rawBytes": 9532,
+          "gzipBytes": 2973
         },
         {
-          "name": "dialog-DXTX-pgz.js",
-          "category": "js_chunk",
-          "rawBytes": 9269,
-          "gzipBytes": 2736
-        },
-        {
-          "name": "ContestFinalResultsPage-DYMznlTw.js",
+          "name": "ContestFinalResultsPage-g4lq-1O-.js",
           "category": "route_page",
-          "rawBytes": 6572,
-          "gzipBytes": 2084
+          "rawBytes": 7165,
+          "gzipBytes": 2227
         },
         {
-          "name": "portal.functions-ATzyRmFV.js",
+          "name": "portal.functions-CexP_C8B.js",
           "category": "js_chunk",
-          "rawBytes": 5735,
-          "gzipBytes": 1889
+          "rawBytes": 6252,
+          "gzipBytes": 2033
         },
         {
-          "name": "ProblemArchivePage-CLV_Jhty.js",
+          "name": "ProblemArchivePage-B1XKpJN2.js",
           "category": "route_page",
-          "rawBytes": 4655,
-          "gzipBytes": 1906
+          "rawBytes": 4574,
+          "gzipBytes": 1863
         },
         {
-          "name": "ProblemDetailPage-ClCOzWyg.js",
-          "category": "route_page",
-          "rawBytes": 3653,
-          "gzipBytes": 1474
-        },
-        {
-          "name": "select-D2dqbeGE.js",
+          "name": "profileAssets-Bc2EJHbv.js",
           "category": "js_chunk",
-          "rawBytes": 3543,
-          "gzipBytes": 1306
+          "rawBytes": 4506,
+          "gzipBytes": 1534
+        },
+        {
+          "name": "ProblemDetailPage-CR8Ow_kI.js",
+          "category": "route_page",
+          "rawBytes": 3573,
+          "gzipBytes": 1436
+        },
+        {
+          "name": "select-Bv15IVVm.js",
+          "category": "js_chunk",
+          "rawBytes": 3521,
+          "gzipBytes": 1302
         },
         {
           "name": "RatingChartInner-gC-MbIaj.js",
@@ -242,28 +254,34 @@
           "gzipBytes": 1369
         },
         {
-          "name": "MonacoEditor-DUkwsXVa.js",
+          "name": "MonacoEditor-CHrzPhza.js",
           "category": "js_chunk",
-          "rawBytes": 2592,
-          "gzipBytes": 1297
+          "rawBytes": 2697,
+          "gzipBytes": 1326
         },
         {
-          "name": "alert-dialog-DgLr7zYw.js",
+          "name": "alert-dialog-BPYza-jU.js",
           "category": "js_chunk",
-          "rawBytes": 2559,
-          "gzipBytes": 978
+          "rawBytes": 2503,
+          "gzipBytes": 944
         },
         {
-          "name": "table-BWDxqegv.js",
+          "name": "table-DiEHvRlZ.js",
           "category": "js_chunk",
-          "rawBytes": 1854,
-          "gzipBytes": 684
+          "rawBytes": 1906,
+          "gzipBytes": 704
         },
         {
-          "name": "card-SFIyoPwl.js",
+          "name": "RatingChart-DKAK3B8u.js",
           "category": "js_chunk",
-          "rawBytes": 1241,
-          "gzipBytes": 508
+          "rawBytes": 1819,
+          "gzipBytes": 922
+        },
+        {
+          "name": "card-CkC8hmlb.js",
+          "category": "js_chunk",
+          "rawBytes": 1203,
+          "gzipBytes": 479
         },
         {
           "name": "useCountdown-BGN4bbYT.js",
@@ -272,22 +290,28 @@
           "gzipBytes": 460
         },
         {
-          "name": "RatingChart-CoijM_H0.js",
-          "category": "js_chunk",
-          "rawBytes": 916,
-          "gzipBytes": 537
-        },
-        {
           "name": "rolldown-runtime-hePW80VL.js",
           "category": "js_chunk",
           "rawBytes": 716,
           "gzipBytes": 428
         },
         {
+          "name": "navigation-R_6tiKhX.js",
+          "category": "js_chunk",
+          "rawBytes": 647,
+          "gzipBytes": 308
+        },
+        {
           "name": "lifecycle-CrG1dfot.js",
           "category": "js_chunk",
           "rawBytes": 507,
           "gzipBytes": 310
+        },
+        {
+          "name": "PracticeProblemPage-B4Uqz1Tg.js",
+          "category": "route_page",
+          "rawBytes": 311,
+          "gzipBytes": 228
         },
         {
           "name": "ContestsHubPage-DyHjJ0IG.css",
@@ -304,13 +328,13 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 378.8,
-        "max": 2425.9,
-        "avg": 1077,
-        "p50": 383.9,
-        "p90": 2425.9,
-        "p95": 2425.9,
-        "p99": 2425.9,
+        "min": 286.2,
+        "max": 982.3,
+        "avg": 606.7,
+        "p50": 299.7,
+        "p90": 982.3,
+        "p95": 982.3,
+        "p99": 982.3,
         "targetMs": 300,
         "passed": false,
         "headers": {
@@ -325,19 +349,19 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 373.4,
-        "max": 425.1,
-        "avg": 392,
-        "p50": 379.1,
-        "p90": 425.1,
-        "p95": 425.1,
-        "p99": 425.1,
+        "min": 269.7,
+        "max": 427.4,
+        "avg": 319.8,
+        "p50": 280.1,
+        "p90": 427.4,
+        "p95": 427.4,
+        "p99": 427.4,
         "targetMs": 250,
         "passed": false,
         "headers": {
           "cacheControl": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800, immutable",
           "xCache": null,
-          "contentEncoding": "br"
+          "contentEncoding": "gzip"
         }
       },
       {
@@ -346,19 +370,19 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 454.8,
-        "max": 858,
-        "avg": 731.7,
-        "p50": 757.2,
-        "p90": 858,
-        "p95": 858,
-        "p99": 858,
+        "min": 278.5,
+        "max": 311.2,
+        "avg": 299.3,
+        "p50": 300.9,
+        "p90": 311.2,
+        "p95": 311.2,
+        "p99": 311.2,
         "targetMs": 350,
-        "passed": false,
+        "passed": true,
         "headers": {
           "cacheControl": "no-cache, no-store, must-revalidate",
           "xCache": "HIT",
-          "contentEncoding": "br"
+          "contentEncoding": null
         }
       },
       {
@@ -367,19 +391,19 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 378.9,
-        "max": 948.4,
-        "avg": 654.2,
-        "p50": 391.8,
-        "p90": 948.4,
-        "p95": 948.4,
-        "p99": 948.4,
+        "min": 252.6,
+        "max": 363.1,
+        "avg": 304.1,
+        "p50": 294.4,
+        "p90": 363.1,
+        "p95": 363.1,
+        "p99": 363.1,
         "targetMs": 400,
-        "passed": false,
+        "passed": true,
         "headers": {
           "cacheControl": "public, max-age=60, stale-while-revalidate=30",
           "xCache": "HIT",
-          "contentEncoding": "br"
+          "contentEncoding": null
         }
       },
       {
@@ -388,27 +412,27 @@
         "status": 200,
         "success": true,
         "samples": 4,
-        "min": 450.4,
-        "max": 1311.5,
-        "avg": 1065.1,
-        "p50": 1230.5,
-        "p90": 1311.5,
-        "p95": 1311.5,
-        "p99": 1311.5,
+        "min": 258,
+        "max": 377.6,
+        "avg": 293.9,
+        "p50": 267.5,
+        "p90": 377.6,
+        "p95": 377.6,
+        "p99": 377.6,
         "targetMs": 350,
-        "passed": false,
+        "passed": true,
         "headers": {
           "cacheControl": "public, max-age=120, stale-while-revalidate=60",
           "xCache": "HIT",
-          "contentEncoding": "br"
+          "contentEncoding": "gzip"
         }
       }
     ],
     "caching": {
       "endpoint": "/leaderboard",
-      "coldLatencyMs": 384,
-      "warmLatencyMs": 432.3,
-      "speedupMultiplier": "0.89",
+      "coldLatencyMs": 295.7,
+      "warmLatencyMs": 298.6,
+      "speedupMultiplier": "0.99",
       "coldStatus": 200,
       "warmStatus": 200,
       "warmXCache": "HIT",
@@ -420,8 +444,8 @@
         "name": "Unfiltered Baseline",
         "query": "(default)",
         "status": 200,
-        "latencyMs": 459,
-        "totalCountHeader": "1",
+        "latencyMs": 848.6,
+        "totalCountHeader": "0",
         "pageSizeHeader": "50",
         "passed": true
       },
@@ -429,16 +453,16 @@
         "name": "Department Filter (CSE)",
         "query": "?department=CSE",
         "status": 200,
-        "latencyMs": 1456.8,
-        "totalCountHeader": "1",
+        "latencyMs": 283.2,
+        "totalCountHeader": "0",
         "pageSizeHeader": "50",
-        "passed": false
+        "passed": true
       },
       {
         "name": "Batch Filter (2024-28)",
         "query": "?batch=2024-28",
         "status": 200,
-        "latencyMs": 479.9,
+        "latencyMs": 328.1,
         "totalCountHeader": "0",
         "pageSizeHeader": "50",
         "passed": true
@@ -447,7 +471,7 @@
         "name": "Star Division (3_star)",
         "query": "?tier=3_star",
         "status": 200,
-        "latencyMs": 449.6,
+        "latencyMs": 356.4,
         "totalCountHeader": "0",
         "pageSizeHeader": "50",
         "passed": true
@@ -456,8 +480,8 @@
         "name": "Deep Pagination (Offset 50)",
         "query": "?offset=50&limit=50",
         "status": 200,
-        "latencyMs": 450.1,
-        "totalCountHeader": "1",
+        "latencyMs": 271.9,
+        "totalCountHeader": "0",
         "pageSizeHeader": "50",
         "passed": true
       }
@@ -465,7 +489,7 @@
     "realtimeSse": {
       "endpoint": "/events/stream",
       "connected": true,
-      "handshakeLatencyMs": 454,
+      "handshakeLatencyMs": 418,
       "firstFrame": ": connected",
       "passed": true,
       "note": "Preamble received; stream verified"
@@ -474,7 +498,7 @@
       "provider": "distributed",
       "judgeHealthy": true,
       "redisHealthy": true,
-      "healthLatencyMs": 1021.3,
+      "healthLatencyMs": 266.8,
       "passed": true
     }
   }
