@@ -61,7 +61,7 @@ export function ProblemDetailPage() {
           <div className="flex flex-col sm:flex-row gap-2.5 w-full">
             <Button
               asChild
-              className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              className="flex-1 h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               <Link to="/practice">
                 <ArrowLeft className="size-3.5 mr-1.5" />
@@ -71,7 +71,7 @@ export function ProblemDetailPage() {
             <Button
               asChild
               variant="outline"
-              className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+              className="flex-1 h-10 rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
             >
               <Link to="/">
                 <Home className="size-3.5 mr-1.5" />

@@ -234,9 +234,8 @@ textarea,
 }
 
 button {
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-family: var(--font-heading), var(--font-sans);
+  font-weight: 700;
 }
 
 .font-display {
@@ -668,26 +667,72 @@ textarea {
   background-color: #171717 !important;
 }
 
-/* LIME HOVER TEXT CONTRAST FIX */
-/* Automatically invert text and SVG icons to black whenever solid lime hover is active */
-button[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]),
-button[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]),
-button[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]),
-button[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]),
-a[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]),
-a[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]),
-a[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]),
-a[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]) {
-  color: #000000 !important;
+/* ── SMOOTH LINEAR TRANSITIONS (ACCORDION, COLLAPSIBLE, INPUTS) ── */
+@keyframes accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
 }
 
-button[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]) *,
-button[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]) *,
-button[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]) *,
-button[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]) *,
-a[class*="hover:bg-lime-400"]:hover:not([class*="hover:bg-lime-400/"]) *,
-a[class*="hover:bg-lime-300"]:hover:not([class*="hover:bg-lime-300/"]) *,
-a[class*="hover:bg-[#B1FA63]"]:hover:not([class*="hover:bg-[#B1FA63]/"]) *,
-a[class*="hover:bg-[#C2FF78]"]:hover:not([class*="hover:bg-[#C2FF78]/"]) * {
-  color: #000000 !important;
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes collapsible-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 280ms linear forwards;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 280ms linear forwards;
+}
+
+.animate-collapsible-down {
+  animation: collapsible-down 280ms linear forwards;
+}
+
+.animate-collapsible-up {
+  animation: collapsible-up 280ms linear forwards;
+}
+
+/* Universal smooth linear transition for inputs, textareas, and selects */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+textarea,
+select {
+  transition-property: width, height, padding, border-color, background-color, box-shadow, color;
+  transition-duration: 200ms;
+  transition-timing-function: linear;
 }

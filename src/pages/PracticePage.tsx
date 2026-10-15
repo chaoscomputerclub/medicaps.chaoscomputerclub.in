@@ -330,7 +330,7 @@ export function PracticePage() {
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-200 border border-white/10 bg-[#171717] rounded-md hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black transition-colors cursor-pointer"
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-300 border border-white/[0.08] bg-[#171717] rounded-[10px] hover:bg-white/[0.08] hover:text-white hover:border-white/20 transition-colors cursor-pointer font-heading font-bold uppercase tracking-wider"
               >
                 Clear all filters
               </button>
@@ -450,7 +450,7 @@ export function PracticePage() {
                 type="button"
                 disabled={pageParam <= 1}
                 onClick={() => updateFilter("page", String(pageParam - 1))}
-                className="px-3 py-1.5 rounded border border-white/10 hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none text-white flex items-center gap-1 cursor-pointer transition-colors"
+                className="px-3 py-1.5 rounded-[10px] bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer transition-colors font-heading font-bold uppercase tracking-wider text-xs"
               >
                 <ChevronLeft className="size-3.5" />
                 Previous
@@ -459,7 +459,7 @@ export function PracticePage() {
                 type="button"
                 disabled={pageParam >= totalPages}
                 onClick={() => updateFilter("page", String(pageParam + 1))}
-                className="px-3 py-1.5 rounded border border-white/10 hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none text-white flex items-center gap-1 cursor-pointer transition-colors"
+                className="px-3 py-1.5 rounded-[10px] bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer transition-colors font-heading font-bold uppercase tracking-wider text-xs"
               >
                 Next
                 <ChevronRight className="size-3.5" />

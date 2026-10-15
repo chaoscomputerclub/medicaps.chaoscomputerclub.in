@@ -70,7 +70,7 @@ function GoogleIcon({ className = "size-4" }: { className?: string }) {
 // ─────────────────────────────────────────────
 const INPUT_BASE =
   "w-full h-11 rounded-[10px] border border-white/10 bg-[#171717] px-3.5 text-base md:text-sm text-white placeholder:text-zinc-500 " +
-  "focus:outline-none focus:border-[#B1FA63] focus-visible:ring-1 focus-visible:ring-[#B1FA63]/50 transition-colors duration-150 ";
+  "focus:outline-none focus:border-[#B1FA63] focus-visible:ring-1 focus-visible:ring-[#B1FA63]/50 transition-all duration-200 ease-linear ";
 
 // ─────────────────────────────────────────────
 // Shared label style
@@ -382,7 +382,7 @@ export function AuthPage() {
               variant="default"
               size="lg"
               disabled={pending || isInvalidDomain || !email.trim()}
-              className="w-full mt-4 h-11 text-sm font-sans font-medium rounded-md active:scale-[0.98] transition-all"
+              className="w-full mt-4 h-11 text-xs font-heading font-extrabold uppercase tracking-wider rounded-[10px] active:scale-[0.98] transition-all"
             >
               {pending ? (
                 <span className="inline-flex items-center gap-2">
@@ -430,7 +430,7 @@ export function AuthPage() {
                 window.location.href = getGoogleLoginURL(returnDest);
               }}
               disabled={pending}
-              className="w-full h-11 text-sm text-zinc-200 hover:text-white [&_span]:hover:text-white border-white/12 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/20 gap-2.5 font-normal rounded-md transition-colors duration-150 active:scale-[0.98]"
+              className="w-full h-11 text-xs text-zinc-300 hover:text-white [&_span]:hover:text-white border border-white/[0.08] bg-[#171717] hover:bg-white/[0.08] hover:border-white/20 gap-2.5 font-heading font-bold uppercase tracking-wider rounded-[10px] transition-all duration-200 ease-linear active:scale-[0.98]"
             >
               <GoogleIcon className="size-4 shrink-0" />
               <span>Continue with Google</span>
@@ -602,7 +602,7 @@ export function AuthPage() {
               handleStatus === "taken" ||
               handleStatus === "checking"
             }
-            className="w-full mt-4 h-11 text-sm font-sans font-medium rounded-md active:scale-[0.98] transition-all"
+            className="w-full mt-4 h-11 text-xs font-heading font-extrabold uppercase tracking-wider rounded-[10px] active:scale-[0.98] transition-all bg-[#B1FA63] text-black hover:bg-[#a0ee4e]"
           >
             {pending ? (
               <span className="inline-flex items-center gap-2">

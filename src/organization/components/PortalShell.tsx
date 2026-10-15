@@ -234,14 +234,14 @@ export function PortalShell() {
       {/* Backdrop overlay for mobile drawer */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden transition-opacity duration-200 ease-linear animate-in fade-in"
           onClick={() => dispatch(setSidebarOpen(false))}
         />
       )}
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed inset-y-0 left-0 w-64 bg-[#141414] border-r border-white/8 px-4 py-4 pt-[calc(1.2rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] flex flex-col z-50 transition-transform duration-150 ease-out md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 w-64 bg-[#141414] border-r border-white/8 px-4 py-4 pt-[calc(1.2rem+env(safe-area-inset-top,0px))] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] flex flex-col z-50 transition-transform duration-200 ease-linear md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >

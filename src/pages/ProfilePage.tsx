@@ -368,7 +368,7 @@ export function ProfilePage() {
                     asChild
                     variant="outline"
                     size="sm"
-                    className="rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black font-heading font-bold uppercase tracking-wider text-xs"
+                    className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:bg-white/[0.08] hover:text-white hover:border-white/20 text-zinc-300 font-heading font-bold uppercase tracking-wider text-xs"
                   >
                     <Link to="/settings">
                       <Edit3 size={11} className="text-[#B1FA63]" />
@@ -384,7 +384,7 @@ export function ProfilePage() {
                     disabled={isPendingFollowAction}
                     variant={isFollowing ? "secondary" : "outline"}
                     size="sm"
-                    className={isFollowing ? "rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e]" : "rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black font-heading font-bold uppercase tracking-wider text-xs"}
+                    className={isFollowing ? "rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e]" : "rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"}
                   >
                     {isFollowing ? (
                       <>
@@ -406,7 +406,7 @@ export function ProfilePage() {
                       </>
                     )}
                   </Button>
-                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black">
+                  <Button type="button" onClick={handleCopyLink} variant="outline" size="icon-sm" className="rounded-[10px] bg-[#171717] border-white/[0.08] hover:bg-white/[0.08] hover:text-white hover:border-white/20">
                     {copied ? <Check size={11} className="text-[#B1FA63]" /> : <Share2 size={11} />}
                   </Button>
                 </div>
@@ -457,7 +457,7 @@ export function ProfilePage() {
                   href={`https://github.com/${m.github_username}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black [&:hover_svg]:text-black rounded-[8px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-[8px] transition-colors"
                 >
                   <Github size={11} className="text-[#B1FA63]" />
                   <span>{m.github_username}</span>
@@ -472,7 +472,7 @@ export function ProfilePage() {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black [&:hover_svg]:text-black rounded-[8px] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-zinc-300 bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] hover:text-white hover:border-white/20 rounded-[8px] transition-colors"
                 >
                   <FaLinkedinIn size={11} className="text-[#B1FA63]" />
                   <span>LinkedIn</span>
@@ -659,91 +659,59 @@ export function ProfilePage() {
         </div>
       </section>
 
-      {/* Achievements Ledger */}
-      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <SectionHeader title="Achievement Ledger" />
-          <span className="text-xs font-mono font-bold tracking-wider text-zinc-400">
-            <span className="text-[#B1FA63]">{achievements.filter((a: any) => a.earned === true).length}</span> / {achievements.length} UNLOCKED
-          </span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
-          {achievements.length === 0 ? (
-            <div className="text-center py-8 text-zinc-500 col-span-full flex flex-col items-center justify-center">
-              <div className="size-16 mb-2 flex items-center justify-center">
-                <img
-                  src="/matiks-assets/badges/badge.webp"
-                  alt=""
-                  className="size-10 object-contain opacity-30 grayscale"
-                />
-              </div>
-              <span className="font-heading font-bold uppercase tracking-wider text-xs">No achievements available.</span>
-            </div>
-          ) : (
-            achievements.filter(isOfficialChapterBadge).map((a: any) => {
-              const isEarned = a.earned === true;
-              const badgeSrc = a.image_url || a.badge_url || getChapterBadgeAsset(a.title || a.name || a.code);
-              const title = a.title || a.name || "Badge";
+      {/* Chapter Badges Ledger */}
+      {(() => {
+        const allBadges = achievements.filter(isOfficialChapterBadge);
+        const unlockedCount = allBadges.filter((a: any) => a.earned === true).length;
 
-              return (
-                <article
-                  key={a.code || a.id || title}
-                  className={`p-4 rounded-[18px] border transition-all flex flex-col justify-between ${
-                    isEarned
-                      ? "border-[#B1FA63]/30 bg-gradient-to-b from-[#222222] to-[#181818] shadow-sm shadow-[#B1FA63]/5"
-                      : "border-white/[0.06] bg-[#171717]/60 opacity-60"
-                  }`}
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2.5 mb-3">
-                      <div className="size-14 rounded-[14px] bg-black/40 border border-white/[0.08] p-2 flex items-center justify-center shrink-0">
-                        <img
-                          src={badgeSrc}
-                          alt=""
-                          className={`size-full object-contain ${
-                            isEarned
-                              ? "filter drop-shadow-[0_2px_8px_rgba(177,250,99,0.25)]"
-                              : "grayscale opacity-30"
-                          }`}
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/matiks-assets/badges/badge.webp";
-                          }}
-                        />
-                      </div>
-                      <span
-                        className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                          isEarned
-                            ? "bg-[#B1FA63]/10 text-[#B1FA63] border-[#B1FA63]/30 font-bold"
-                            : "bg-white/[0.03] text-zinc-500 border-white/[0.06]"
-                        }`}
-                      >
-                        {isEarned ? "UNLOCKED" : "LOCKED"}
+        return (
+          <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <SectionHeader title="Chapter Badges" />
+              <span className="text-xs font-mono font-bold tracking-wider text-zinc-400">
+                <span className="text-[#B1FA63] tabular-nums">{unlockedCount}</span> / {allBadges.length} UNLOCKED
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 text-xs">
+              {allBadges.map((a: any) => {
+                const isEarned = a.earned === true;
+                const badgeSrc = a.image_url || a.badge_url || getChapterBadgeAsset(a.title || a.name || a.code);
+                const title = a.title || a.name || "Badge";
+
+                return (
+                  <div
+                    key={a.code || a.id || title}
+                    className="flex flex-col items-center justify-center gap-3 group"
+                  >
+                    <img
+                      src={badgeSrc}
+                      alt={title}
+                      className={`size-24 sm:size-28 object-contain transition-all duration-200 select-none ${
+                        isEarned
+                          ? "filter drop-shadow-[0_4px_16px_rgba(177,250,99,0.3)] hover:scale-105"
+                          : "grayscale opacity-35"
+                      }`}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/matiks-assets/badges/badge.webp";
+                      }}
+                    />
+                    {!isEarned ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.04] text-zinc-500 border border-white/[0.08]">
+                        <LockKeyhole className="size-2.5" />
+                        LOCKED
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-heading font-bold text-white text-sm">{title}</h3>
-                      <span className="text-[10px] font-mono text-zinc-500 uppercase">
-                        [{a.code || "CCC"}]
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#B1FA63]/10 text-[#B1FA63] border border-[#B1FA63]/30 font-bold">
+                        UNLOCKED
                       </span>
-                    </div>
-                    <p className="text-zinc-400 text-xs mt-1.5 leading-relaxed font-sans">
-                      {a.description}
-                    </p>
+                    )}
                   </div>
-                  {a.criteria && (
-                    <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-                      <span>Requirement</span>
-                      <span className={isEarned ? "text-zinc-300 font-medium" : "text-zinc-500"}>
-                        {a.criteria}
-                      </span>
-                    </div>
-                  )}
-                </article>
-              );
-            })
-          )}
-        </div>
-      </section>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Trust Footer */}
       <footer className="flex items-center gap-3 p-5 rounded-[18px] border border-white/[0.08] bg-[#1F1F1F] text-zinc-400 font-sans text-xs">

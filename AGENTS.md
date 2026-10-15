@@ -67,6 +67,27 @@ Strictly apply the three calibrated dials:
 6. **Depth & Polish:** Layered dual shadows. Crisp semi-transparent borders (`border-white/10`) over obsidian backgrounds (`#09090b` / `#18181b`). Nested concentric radii ($r_{\text{child}} = r_{\text{parent}} - \text{padding}$). `color-scheme: dark` on root `<html>`.
 7. **Component Sourcing & Verification:** Sourcing UI primitives must rely on **Radix UI Primitives** and modern patterns from **21st.dev**. Validate rendering and accessibility via **Playwright CLI** (`npx @playwright/cli snapshot`).
 
+## 4. Problem Authoring & Competitive Programming Quality Gate
+All agents creating, modifying, or managing coding arena problems MUST adhere strictly to [`.agents/rules/problem-authoring-admin-protocol.md`](file:///.agents/rules/problem-authoring-admin-protocol.md):
+- **Novelty & Strict Anti-Copy Rule**: **NEVER copy problems verbatim from LeetCode or other platforms** (no verbatim "Two Sum", "Container With Most Water", "Trapping Rain Water"). Questions must feel fresh, original, and non-Googleable.
+- **Inspirational Reference & "Mixed Feeling" Hybrid Twists**: Take foundational mechanics from competitive programming (Codeforces, AtCoder, CSES, ICPC, LeetCode) and synthesize new problem types:
+  - Blend 2 algorithmic paradigms or introduce subtle constraint twists (e.g. monotonic stack + parity constraints, sliding window + bounded deletion budget, BFS on grids with energy cells).
+  - Use engaging, relatable real-world computing metaphors (cache compaction, packet scheduling, memory allocators, rover grid routing) without niche physics jargon.
+- **Strict Anti-LaTeX**: No `$`, `$$`, or raw LaTeX. Use standard inline code backticks (`` `nums[i]` ``).
+- **Single-Line Flex Constraints**: Use bullet `-` format, never strip negative signs (`-10^9`).
+- **Zero Manual Examples in Description**: Never include manual `### Example` blocks in `description`. The frontend dynamically renders all `sample_testcases` via `<ProblemExample />`. Embedding examples in description causes duplicate UI example boxes.
+- **Starter Code Architecture**:
+  - Python / TypeScript / JavaScript: **NEVER USE `class Solution`**. Use standalone top-level functions.
+  - C++ / Java: **MUST USE `class Solution`**.
+  - All languages: Include `@return` type annotations.
+- **Media & 2D Diagrams**: Never commit images to the frontend repository (`public/`). Always upload diagrams to backend MinIO S3 (`POST /api/storage/upload`, prefix `problem-diagrams`) and use returned CDN URLs. Keep diagrams 2D, minimal, high-contrast.
+- **Python Oracle Verification**: Verify all sample and hidden testcases against an independent Python reference oracle before publishing.
+- **Strict String Format for Testcase `expected_output`**:
+  - **Arrays / Lists / Matrices**: Must be JSON string-serialized (`json.dumps(val)`), e.g. `"[1, 2, 3]"`. Raw JSON arrays `[1,2,3]` cause React JSX `{tc.expected_output}` to render concatenated digits without commas (`123`).
+  - **Booleans**: Must be lowercase strings `"true"` or `"false"`. Never use Python `True`/`False` or JSON booleans (avoids judge mismatch `false != False`, React blank renders, and falsy coercion to `null`).
+  - **Integers / Numbers**: Must be stringified (`str(val)`), e.g. `"0"`, `"42"`, `"-1"` (prevents raw `0` from falsy-coercing to `""` / `Output: null`).
+- **Lifecycle Publication**: Remember that problem creation/updates set status to `DRAFT`. Always call `POST /api/admin/problems/{id}/publish`.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
@@ -79,3 +100,4 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+

@@ -115,7 +115,7 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
       {/* Top Header Bar matching LeetCode Utilization */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs pb-1">
         <div className="flex items-center gap-2 text-zinc-300">
-          <strong className="text-white text-lg font-display tracking-wide tabular-nums">
+          <strong className="text-white text-lg font-sans font-bold tracking-tight tabular-nums">
             {loading ? "…" : totalSubmissions}
           </strong>
           <span className="font-sans text-zinc-400">submissions in the past one year</span>
@@ -124,17 +124,17 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 self-end sm:self-auto">
+        <div className="flex items-center gap-3 text-xs font-sans text-zinc-400 self-end sm:self-auto">
           <span>
             Active Days:{" "}
-            <strong className="text-white tabular-nums font-sans font-bold">
+            <strong className="text-white tabular-nums font-sans font-semibold">
               {loading ? "…" : summary.active_days}
             </strong>
           </span>
           <span className="text-zinc-700">|</span>
           <span>
             Max Streak:{" "}
-            <strong className="text-white tabular-nums font-sans font-bold">
+            <strong className="text-white tabular-nums font-sans font-semibold">
               {loading ? "…" : summary.longest_streak}
             </strong>
           </span>
@@ -229,16 +229,16 @@ export function CodingActivityGraph({ activityData, loading = false }: CodingAct
                                 <button
                                   type="button"
                                   aria-label={`${dateFormatted}: ${activity} submissions`}
-                                  className={`w-full aspect-square rounded-[2px] border transition-all duration-100 cursor-pointer focus-visible:ring-1 focus-visible:ring-lime-400 focus-visible:outline-none hover:scale-125 hover:z-10 ${getIntensityClass(
+                                  className={`w-full aspect-square rounded-[2px] border transition-all duration-100 cursor-pointer focus-visible:ring-1 focus-visible:ring-[#B1FA63] focus-visible:outline-none hover:scale-125 hover:z-10 ${getIntensityClass(
                                     activity
                                   )}`}
                                 />
                               </TooltipTrigger>
                               <TooltipContent
                                 side="top"
-                                className="bg-black/95 text-white border border-white/15 px-2.5 py-1.5 font-sans text-xs rounded"
+                                className="bg-black/95 text-white border border-white/15 px-2.5 py-1.5 font-sans text-xs rounded shadow-lg"
                               >
-                                <div className="font-semibold text-emerald-400 text-[11px]">
+                                <div className="font-semibold text-[#B1FA63] text-[11px]">
                                   {dateFormatted}
                                 </div>
                                 <div className="text-[10px] text-zinc-300">

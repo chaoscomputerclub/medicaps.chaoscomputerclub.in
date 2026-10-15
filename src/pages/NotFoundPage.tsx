@@ -41,19 +41,19 @@ export function NotFoundPage() {
             type="button"
             variant="outline"
             onClick={handleGoBack}
-            className="h-10 rounded-lg border-white/10 bg-transparent px-4 text-sm font-sans text-zinc-300 hover:bg-white/[0.04] hover:text-white focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60"
+            className="rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
           >
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            Go back
+            <ArrowLeft className="size-3.5 mr-1.5 text-[#B1FA63]" aria-hidden="true" />
+            <span>Go back</span>
           </Button>
 
           <Button
             asChild
-            className="h-10 rounded-lg bg-[#B1FA63] px-4 text-sm font-sans font-semibold text-black hover:bg-[#9fe350] focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+            className="rounded-[10px] bg-[#B1FA63] text-black hover:bg-[#a0ee4e] font-heading font-extrabold uppercase tracking-wider text-xs"
           >
             <Link to="/">
-              <Home className="size-4" aria-hidden="true" />
-              Back to dashboard
+              <Home className="size-3.5 mr-1.5" aria-hidden="true" />
+              <span>Back to dashboard</span>
             </Link>
           </Button>
         </div>

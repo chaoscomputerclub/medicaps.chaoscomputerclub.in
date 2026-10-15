@@ -203,14 +203,14 @@ function SaveButton({
       disabled={disabled || saving}
       onClick={onClick}
       className={cn(
-        "relative inline-flex items-center justify-center w-[80px] min-w-[80px] shrink-0 h-10 px-3 py-2 text-xs font-sans font-medium rounded-md transition-all duration-150 cursor-pointer select-none overflow-hidden",
+        "relative inline-flex items-center justify-center w-[80px] min-w-[80px] shrink-0 h-10 px-3 py-2 text-xs font-heading font-bold uppercase tracking-wider rounded-[10px] transition-all duration-150 cursor-pointer select-none overflow-hidden",
         "focus:outline-none focus-visible:ring-1 focus-visible:ring-lime-400 focus-visible:border-lime-400",
         "disabled:cursor-not-allowed disabled:opacity-40 disabled:pointer-events-none disabled:border-white/8 disabled:bg-transparent",
         saved
           ? "border border-lime-400/40 bg-lime-400/10 text-lime-400"
           : saving
           ? "border border-white/15 bg-[#171717] text-zinc-300"
-          : "border border-white/12 bg-[#171717] hover:bg-[#222222] text-zinc-300 hover:text-white hover:border-white/20 active:bg-[#282828]",
+          : "border border-white/[0.08] bg-[#171717] hover:bg-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20 active:bg-white/[0.12]",
         className,
       )}
     >

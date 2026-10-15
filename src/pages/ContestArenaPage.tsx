@@ -1351,7 +1351,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <div className="flex flex-col sm:flex-row gap-2.5 w-full">
               <Button
                 asChild
-                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="flex-1 h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <Link to="/practice">
                   <ArrowLeft className="size-3.5 mr-1.5" />
@@ -1361,7 +1361,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <Button
                 asChild
                 variant="outline"
-                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+                className="flex-1 h-10 rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
               >
                 <Link to="/">
                   <Home className="size-3.5 mr-1.5" />
@@ -1414,7 +1414,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <Button
                 asChild
                 variant="default"
-                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
+                className="flex-1 h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors"
               >
                 <Link to={`/contests/${contestSlug}/results`}>
                   <Trophy className="size-3.5 mr-1.5" />
@@ -1424,7 +1424,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <Button
                 asChild
                 variant="outline"
-                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+                className="flex-1 h-10 rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
               >
                 <Link to={`/contests/${contestSlug}/summary`}>
                   <FileText className="size-3.5 mr-1.5" />
@@ -1495,7 +1495,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <div className="flex flex-col gap-2.5 w-full">
               <Button
                 asChild
-                className="h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <Link to={`/auth?redirect=${encodeURIComponent(`/contests/${contestSlug}/arena`)}`}>
                   <LogIn className="size-3.5 mr-1.5" />
@@ -1536,7 +1536,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <div className="flex flex-col sm:flex-row gap-2.5 w-full">
               <Button
                 asChild
-                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
+                className="flex-1 h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors"
               >
                 <Link to={`/contests/${contestSlug}/lobby`}>
                   <Clock className="size-3.5 mr-1.5" />
@@ -1546,7 +1546,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <Button
                 asChild
                 variant="outline"
-                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+                className="flex-1 h-10 rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
               >
                 <Link to={`/contests/${contestSlug}`}>
                   <ArrowLeft className="size-3.5 mr-1.5" />
@@ -1585,7 +1585,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <div className="flex flex-col sm:flex-row gap-2.5 w-full">
               <Button
                 asChild
-                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                className="flex-1 h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors focus-visible:ring-2 focus-visible:ring-[#B1FA63]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <Link to="/contests">
                   <ArrowLeft className="size-3.5 mr-1.5" />
@@ -1595,7 +1595,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <Button
                 asChild
                 variant="outline"
-                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+                className="flex-1 h-10 rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
               >
                 <Link to="/">
                   <Home className="size-3.5 mr-1.5" />
@@ -1631,7 +1631,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <div className="flex flex-col sm:flex-row gap-2.5 w-full">
               <Button
                 onClick={() => dispatch(fetchContestArenaThunk(contestSlug))}
-                className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
+                className="flex-1 h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors"
               >
                 <RotateCcw className="size-3.5 mr-1.5" />
                 <span>Re-check Status</span>
@@ -1639,7 +1639,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               <Button
                 asChild
                 variant="outline"
-                className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+                className="flex-1 h-10 rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
               >
                 <Link to={`/contests/${contestSlug}`}>
                   <span>Exit to Overview</span>
@@ -1679,7 +1679,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   dispatch(fetchContestArenaThunk(contestSlug));
                 }
               }}
-              className="flex-1 h-10 rounded-lg bg-[#B1FA63] text-black font-semibold hover:bg-[#9fe350] transition-colors"
+              className="flex-1 h-10 rounded-[10px] bg-[#B1FA63] text-black font-heading font-extrabold uppercase tracking-wider text-xs hover:bg-[#a0ee4e] transition-colors"
             >
               <RotateCcw className="size-3.5 mr-1.5" />
               <span>Retry</span>
@@ -1687,7 +1687,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             <Button
               asChild
               variant="outline"
-              className="flex-1 h-10 rounded-lg border-white/10 bg-transparent text-zinc-300 hover:bg-white/[0.04] hover:text-white"
+              className="flex-1 h-10 rounded-[10px] bg-[#171717] border-white/[0.08] text-zinc-300 hover:bg-white/[0.08] hover:text-white hover:border-white/20 font-heading font-bold uppercase tracking-wider text-xs"
             >
               <Link to={isPracticeMode ? "/practice" : `/contests/${contestSlug}`}>
                 <ArrowLeft className="size-3.5 mr-1.5" />
@@ -2235,42 +2235,44 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
           </div>
 
           {/* Draggable Console Height Adjuster */}
-          {!isDrawerCollapsed && (
+          <div
+            role="separator"
+            aria-orientation="horizontal"
+            aria-label="Resize console drawer"
+            onMouseDown={() => setIsDraggingHeight(true)}
+            onTouchStart={() => setIsDraggingHeight(true)}
+            onDoubleClick={handleResetHeight}
+            className={`group relative flex items-center justify-center h-2 -my-1 z-20 cursor-row-resize select-none shrink-0 transition-opacity duration-280 ease-linear ${
+              isDrawerCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
+            } ${
+              isDraggingHeight ? "bg-[#B1FA63]/20" : "hover:bg-[#B1FA63]/10"
+            }`}
+            title="Drag to adjust console height · Double-click to reset (240px)"
+          >
             <div
-              role="separator"
-              aria-orientation="horizontal"
-              aria-label="Resize console drawer"
-              onMouseDown={() => setIsDraggingHeight(true)}
-              onTouchStart={() => setIsDraggingHeight(true)}
-              onDoubleClick={handleResetHeight}
-              className={`group relative flex items-center justify-center h-2 -my-1 z-20 cursor-row-resize select-none shrink-0 transition-colors ${
-                isDraggingHeight ? "bg-[#B1FA63]/20" : "hover:bg-[#B1FA63]/10"
+              className={`h-px w-full transition-colors ${
+                isDraggingHeight
+                  ? "bg-[#B1FA63] "
+                  : "bg-white/10 group-hover:bg-[#B1FA63]/80"
               }`}
-              title="Drag to adjust console height · Double-click to reset (240px)"
+            />
+            <div
+              className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-3.5 w-7 rounded-full border  transition-all pointer-events-none ${
+                isDraggingHeight
+                  ? "bg-[#B1FA63] border-[#B1FA63] text-black scale-110"
+                  : "bg-[#1F1F1F] border-white/20 text-zinc-400 group-hover:border-[#B1FA63] group-hover:bg-[#141414] group-hover:text-[#B1FA63]"
+              }`}
             >
-              <div
-                className={`h-px w-full transition-colors ${
-                  isDraggingHeight
-                    ? "bg-[#B1FA63] "
-                    : "bg-white/10 group-hover:bg-[#B1FA63]/80"
-                }`}
-              />
-              <div
-                className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center h-3.5 w-7 rounded-full border  transition-all pointer-events-none ${
-                  isDraggingHeight
-                    ? "bg-[#B1FA63] border-[#B1FA63] text-black scale-110"
-                    : "bg-[#1F1F1F] border-white/20 text-zinc-400 group-hover:border-[#B1FA63] group-hover:bg-[#141414] group-hover:text-[#B1FA63]"
-                }`}
-              >
-                <GripHorizontal className="size-2.5" />
-              </div>
+              <GripHorizontal className="size-2.5" />
             </div>
-          )}
+          </div>
 
           {/* Console & Execution Drawer */}
           <div
             style={{ height: isDrawerCollapsed ? "0px" : `${drawerHeight}px` }}
-            className={`flex flex-col border-t border-white/10 bg-[#171717] shrink-0 overflow-hidden transition-[height] duration-75 ease-out ${
+            className={`flex flex-col border-t border-white/10 bg-[#171717] shrink-0 overflow-hidden ${
+              isDraggingHeight ? "transition-none" : "transition-[height] duration-280 ease-linear"
+            } ${
               isDrawerCollapsed ? "border-t-0" : ""
             }`}
           >
@@ -2339,8 +2341,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
             </div>
 
             {/* Drawer Content */}
-            {!isDrawerCollapsed && (
-              <div className="flex-1 overflow-y-auto p-3 font-sans text-xs">
+            <div className="flex-1 min-h-0 overflow-y-auto p-3 font-sans text-xs">
                 {activeConsoleTab === "testcases" ? (
                   <div className="space-y-3">
                     {/* Testcase Case Selector */}
@@ -2804,7 +2805,6 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                   </div>
                 )}
               </div>
-            )}
           </div>
 
           {/* Action Footer in Tactical Dark Theme */}
@@ -2885,7 +2885,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         className={`size-7 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorFontSize === size
                             ? "bg-lime-400 text-black border-lime-400"
-                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black"
+                            : "bg-black text-zinc-400 border-white/10 hover:bg-white/[0.08] hover:text-white hover:border-white/20"
                         }`}
                       >
                         {size}
@@ -2943,7 +2943,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
                         className={`px-3 py-1 rounded-md font-sans text-sm font-semibold transition-colors cursor-pointer border ${
                           editorTabSize === spaces
                             ? "bg-lime-400 text-black border-lime-400"
-                            : "bg-black text-zinc-400 border-white/10 hover:bg-lime-400 hover:text-black hover:border-lime-400 hover:[&_*]:!text-black hover:[&_svg]:!text-black"
+                            : "bg-black text-zinc-400 border-white/10 hover:bg-white/[0.08] hover:text-white hover:border-white/20"
                         }`}
                       >
                         {spaces} Spaces
@@ -3083,7 +3083,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
 
       <aside
         aria-label="Contest Problem List and Standings"
-        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-[#141414] border-r border-white/10  flex flex-col transition-transform duration-200 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-full max-w-[420px] bg-[#141414] border-r border-white/10  flex flex-col transition-transform duration-200 ease-linear ${
           isProblemListOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         }`}
       >

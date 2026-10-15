@@ -132,7 +132,7 @@ export function RecentSubmissionsCard({
 
           <Link
             to={activeTab === "tournaments" ? "/contests" : "/practice"}
-            className="text-zinc-400 hover:text-[#B1FA63] text-xs font-heading font-bold uppercase tracking-wider transition-colors flex items-center gap-1 self-end sm:self-auto"
+            className="text-zinc-400 hover:text-[#B1FA63] text-xs font-sans font-semibold transition-colors flex items-center gap-1 self-end sm:self-auto"
           >
             <span>{activeTab === "tournaments" ? "All contests" : "Practice arena"}</span>
             <ChevronRight className="size-3" />
@@ -149,16 +149,16 @@ export function RecentSubmissionsCard({
               Loading recent submissions…
             </div>
           ) : acceptedSubmissions.length === 0 ? (
-            <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
-              <MakoMascot variant="tasks" size="md" className="opacity-90" />
-              <p className="text-zinc-500 font-sans text-xs">
+            <div className="py-7 text-center flex flex-col items-center justify-center space-y-2.5">
+              <MakoMascot variant="tasks" size="lg" className="drop-shadow-md select-none pointer-events-none" />
+              <p className="text-zinc-400 font-sans text-xs">
                 No accepted problem submissions on file yet.
               </p>
               <Link
                 to="/practice"
-                className="inline-block text-xs font-sans text-lime-400 hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-sans font-semibold text-[#B1FA63] hover:text-[#9fe350] hover:underline transition-colors"
               >
-                Solve practice problems →
+                <span>Solve practice problems →</span>
               </Link>
             </div>
           ) : (
@@ -209,15 +209,16 @@ export function RecentSubmissionsCard({
               Loading submissions…
             </div>
           ) : safeSubmissions.length === 0 ? (
-            <div className="py-8 text-center space-y-2">
-              <p className="text-zinc-500 font-sans text-xs">
+            <div className="py-7 text-center flex flex-col items-center justify-center space-y-2.5">
+              <MakoMascot variant="coder" size="lg" className="drop-shadow-md select-none pointer-events-none" />
+              <p className="text-zinc-400 font-sans text-xs">
                 No submissions logged on file yet.
               </p>
               <Link
                 to="/practice"
-                className="inline-block text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-sans font-semibold text-[#B1FA63] hover:text-[#9fe350] hover:underline transition-colors"
               >
-                Start practicing →
+                <span>Start practicing →</span>
               </Link>
             </div>
           ) : (
@@ -265,16 +266,16 @@ export function RecentSubmissionsCard({
         <TabsPanel value="tournaments">
           <div className="space-y-1">
             {safeBattles.length === 0 ? (
-              <div className="py-6 text-center flex flex-col items-center justify-center space-y-2.5">
-                <MakoMascot variant="ready" size="md" className="opacity-90" />
-                <p className="text-zinc-500 font-sans text-xs">
+              <div className="py-7 text-center flex flex-col items-center justify-center space-y-2.5">
+                <MakoMascot variant="ready" size="lg" className="drop-shadow-md select-none pointer-events-none" />
+                <p className="text-zinc-400 font-sans text-xs">
                   No official tournament records on file yet.
                 </p>
                 <Link
                   to="/contests"
-                  className="inline-block text-xs font-heading font-bold uppercase tracking-wider text-[#B1FA63] hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-sans font-semibold text-[#B1FA63] hover:text-[#9fe350] hover:underline transition-colors"
                 >
-                  View upcoming contests →
+                  <span>View upcoming contests →</span>
                 </Link>
               </div>
             ) : (

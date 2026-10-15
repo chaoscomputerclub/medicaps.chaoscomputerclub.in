@@ -57,24 +57,17 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
             return (
               <div
                 key={item.id || item.code || idx}
-                title={`${title} — ${item.description || item.criteria || ""}`}
+                title={`${title}${item.description ? ` — ${item.description}` : ""}`}
                 className="relative group flex flex-col items-center"
               >
-                <div
-                  className="size-16 rounded-[16px] bg-gradient-to-b from-[#2A2A2A] to-[#141414] border border-[#B1FA63]/30 flex items-center justify-center group-hover:scale-105 transition-transform duration-200 p-2 shadow-sm shadow-[#B1FA63]/10"
-                >
-                  <img
-                    src={badgeSrc}
-                    alt=""
-                    className="size-full object-contain filter drop-shadow-[0_2px_8px_rgba(177,250,99,0.25)]"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/matiks-assets/badges/badge.webp";
-                    }}
-                  />
-                </div>
-                <span className="text-[11px] font-heading font-bold text-zinc-200 mt-2 max-w-[80px] truncate text-center">
-                  {title}
-                </span>
+                <img
+                  src={badgeSrc}
+                  alt={title}
+                  className="size-16 object-contain filter drop-shadow-[0_2px_8px_rgba(177,250,99,0.25)] group-hover:scale-105 transition-transform duration-200 select-none"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/matiks-assets/badges/badge.webp";
+                  }}
+                />
               </div>
             );
           })}

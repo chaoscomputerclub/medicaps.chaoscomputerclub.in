@@ -327,11 +327,17 @@ export const ProblemStatementView: React.FC<ProblemStatementViewProps> = ({
                     )}
                   </button>
 
-                  {isRevealed && (
-                    <div className="px-3.5 pb-3 pt-1 border-t border-white/[0.06] text-xs leading-relaxed text-zinc-300">
-                      <ReadmeRenderer content={hintText} />
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-280 ease-linear ${
+                      isRevealed ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0 pointer-events-none"
+                    }`}
+                  >
+                    <div className="overflow-hidden min-h-0">
+                      <div className="px-3.5 pb-3 pt-1 border-t border-white/[0.06] text-xs leading-relaxed text-zinc-300">
+                        <ReadmeRenderer content={hintText} />
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}

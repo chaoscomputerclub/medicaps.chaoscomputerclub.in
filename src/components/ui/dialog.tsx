@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-150",
+      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-250 ease-linear",
       className,
     )}
     {...props}
@@ -40,13 +40,13 @@ const DialogContent = React.forwardRef<
         ref={ref}
         style={style}
         className={cn(
-          "pointer-events-auto relative w-full max-w-lg border border-white/10 bg-[#1F1F1F] p-6 duration-150 rounded-[24px] text-white max-h-[90vh] overflow-y-auto overscroll-contain focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          "pointer-events-auto relative w-full max-w-lg border border-white/10 bg-[#1F1F1F] p-6 duration-250 ease-linear rounded-[24px] text-white max-h-[90vh] overflow-y-auto overscroll-contain focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           className,
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-[8px] p-1.5 text-zinc-400 opacity-80 cursor-pointer transition-colors duration-150 hover:opacity-100 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B1FA63] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1F1F1F] disabled:pointer-events-none">
+        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-[8px] p-1.5 text-zinc-400 opacity-80 cursor-pointer transition-colors duration-250 ease-linear hover:opacity-100 hover:text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B1FA63] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1F1F1F] disabled:pointer-events-none">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

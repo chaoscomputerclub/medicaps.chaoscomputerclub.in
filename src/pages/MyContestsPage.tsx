@@ -148,7 +148,7 @@ export function MyContestsPage() {
             makoVariant="excited"
             className="border-0 bg-transparent my-0 py-10"
             action={
-              <Button asChild variant="outline" size="default" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-[#B1FA63] hover:text-black hover:border-[#B1FA63] hover:[&_*]:!text-black hover:[&_svg]:!text-black">
+              <Button asChild variant="outline" size="default" className="rounded-[10px] bg-[#171717] border-white/10 text-white hover:bg-white/[0.08] hover:text-white hover:border-white/20">
                 <Link to="/contests">Explore Contests</Link>
               </Button>
             }
