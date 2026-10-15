@@ -8,7 +8,6 @@ import {
   ArrowRight,
   ExternalLink,
   Code2,
-  Sparkles,
   Flame,
   Search,
   Bell,
@@ -662,14 +661,6 @@ export function ContestsHubPage() {
                 })}
               </div>
             )}
-
-            {/* Sub-hero note with animated sparkles */}
-            <div className="group flex items-center justify-center gap-2 text-xs sm:text-sm font-sans text-zinc-500 mt-6 cursor-default">
-              <Sparkles className="size-4 text-lime-400 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-125" />
-              <span className="group-hover:text-zinc-400 transition-colors">
-                Campus Competitive Programming Arena • Medi-Caps University Cadets
-              </span>
-            </div>
           </div>
         </div>
 
