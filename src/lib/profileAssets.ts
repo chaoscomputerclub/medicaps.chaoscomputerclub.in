@@ -296,15 +296,22 @@ export interface ChapterBadgeItem {
  */
 export function computeAuthoritativeBadges(params: {
   rating?: number | null;
+  peak_rating?: number | null;
   attended?: number | null;
   podiums?: number | null;
   total_solved?: number | null;
   rawAchievements?: any[] | null;
 }): ChapterBadgeItem[] {
   const r = params.rating ?? 1200;
+  const peak = params.peak_rating ?? r;
+  const effR = Math.max(r, peak);
   const solves = params.total_solved ?? 0;
   const contests = params.attended ?? 0;
   const pods = params.podiums ?? 0;
+
+  // Chapter badges derive exclusively from official contest ratings.
+  // Unranked cadets (0 official contest attendance) have earned zero badges.
+  const hasOfficialRank = contests >= 1;
 
   const catalog: ChapterBadgeItem[] = [
     {
@@ -315,9 +322,9 @@ export function computeAuthoritativeBadges(params: {
       icon: "⚡",
       image_url: "/matiks-assets/badges/Novice.png",
       badge_url: "/matiks-assets/badges/Novice.png",
-      description: "Solved at least 10 competitive problems and participated in an official contest (or 15+ solved problems).",
-      criteria: "10+ Solves & 1 Contest (or 15+ Solves)",
-      earned: Boolean((solves >= 10 && contests >= 1) || solves >= 15),
+      description: "Participated in an official campus tournament and established baseline contest rating ≥ 1200.",
+      criteria: "Rating ≥ 1200 in Official Contests",
+      earned: Boolean(hasOfficialRank && effR >= 1200),
     },
     {
       id: "badge_amateur",
@@ -327,9 +334,9 @@ export function computeAuthoritativeBadges(params: {
       icon: "🛡️",
       image_url: "/matiks-assets/badges/Amateur.png",
       badge_url: "/matiks-assets/badges/Amateur.png",
-      description: "Attained rating ≥ 1400 with 25+ solved problems and 2+ official contest participations.",
-      criteria: "Rating ≥ 1400, 25+ Solves, 2+ Contests",
-      earned: Boolean(r >= 1400 && solves >= 25 && contests >= 2),
+      description: "Attained official contest rating ≥ 1400 in campus tournaments.",
+      criteria: "Rating ≥ 1400 in Official Contests",
+      earned: Boolean(hasOfficialRank && effR >= 1400),
     },
     {
       id: "badge_candidate",
@@ -339,9 +346,9 @@ export function computeAuthoritativeBadges(params: {
       icon: "🎯",
       image_url: "/matiks-assets/badges/Candidate.png",
       badge_url: "/matiks-assets/badges/Candidate.png",
-      description: "Attained rating ≥ 1600 with 50+ solved problems and 3+ official contest participations.",
-      criteria: "Rating ≥ 1600, 50+ Solves, 3+ Contests",
-      earned: Boolean(r >= 1600 && solves >= 50 && contests >= 3),
+      description: "Attained official contest rating ≥ 1600 in campus tournaments.",
+      criteria: "Rating ≥ 1600 in Official Contests",
+      earned: Boolean(hasOfficialRank && effR >= 1600),
     },
     {
       id: "badge_expert",
@@ -351,9 +358,9 @@ export function computeAuthoritativeBadges(params: {
       icon: "🔥",
       image_url: "/matiks-assets/badges/Expert.png",
       badge_url: "/matiks-assets/badges/Expert.png",
-      description: "Elite tier: Attained rating ≥ 1800 with 75+ solved problems and 5+ tournament battles.",
-      criteria: "Rating ≥ 1800, 75+ Solves, 5+ Contests",
-      earned: Boolean(r >= 1800 && solves >= 75 && contests >= 5),
+      description: "Elite tier: Attained official contest rating ≥ 1800 in campus tournaments.",
+      criteria: "Rating ≥ 1800 in Official Contests",
+      earned: Boolean(hasOfficialRank && effR >= 1800),
     },
     {
       id: "badge_master",
@@ -363,9 +370,9 @@ export function computeAuthoritativeBadges(params: {
       icon: "🏆",
       image_url: "/matiks-assets/badges/Master.png",
       badge_url: "/matiks-assets/badges/Master.png",
-      description: "Master tier: Attained rating ≥ 2000, 100+ solved problems, and secured at least 1 official podium.",
-      criteria: "Rating ≥ 2000, 100+ Solves, 1+ Podium",
-      earned: Boolean(r >= 2000 && solves >= 100 && pods >= 1),
+      description: "Master tier: Attained official contest rating ≥ 2000 in campus tournaments.",
+      criteria: "Rating ≥ 2000 in Official Contests",
+      earned: Boolean(hasOfficialRank && effR >= 2000),
     },
     {
       id: "badge_grandmaster",
@@ -375,9 +382,9 @@ export function computeAuthoritativeBadges(params: {
       icon: "👑",
       image_url: "/matiks-assets/badges/GrandMaster.png",
       badge_url: "/matiks-assets/badges/GrandMaster.png",
-      description: "Pinnacle GrandMaster: Attained rating ≥ 2200, 150+ problems solved, and multiple podium victories.",
-      criteria: "Rating ≥ 2200, 150+ Solves, 2+ Podiums",
-      earned: Boolean(r >= 2200 && solves >= 150 && pods >= 2),
+      description: "Pinnacle GrandMaster: Attained official contest rating ≥ 2200 in campus tournaments.",
+      criteria: "Rating ≥ 2200 in Official Contests",
+      earned: Boolean(hasOfficialRank && effR >= 2200),
     },
   ];
 
@@ -394,7 +401,12 @@ export function computeAuthoritativeBadges(params: {
       return catalog.map((b) => {
         const serverMatch = validServerBadges.get(b.code) || validServerBadges.get(b.title.toUpperCase());
         if (serverMatch && typeof serverMatch.earned === "boolean") {
-          return { ...b, earned: serverMatch.earned };
+          return {
+            ...b,
+            earned: serverMatch.earned,
+            description: serverMatch.description || b.description,
+            criteria: serverMatch.criteria || b.criteria,
+          };
         }
         return b;
       });

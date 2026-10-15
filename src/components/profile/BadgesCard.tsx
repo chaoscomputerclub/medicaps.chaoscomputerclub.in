@@ -45,7 +45,7 @@ export function BadgesCard({ achievements = [], tier, rating }: BadgesCardProps)
           </div>
           <p className="text-xs font-heading font-bold uppercase tracking-wider text-zinc-300">No badges unlocked yet</p>
           <span className="text-xs font-sans text-zinc-500 mt-1 max-w-xs leading-relaxed">
-            Attain strict contest ratings and solve challenges to unlock official chapter badges.
+            Attain official contest ratings in campus tournaments to unlock chapter badges.
           </span>
         </div>
       ) : (

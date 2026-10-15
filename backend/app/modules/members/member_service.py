@@ -266,21 +266,27 @@ class MemberService:
         is_core_member: bool,
         total_solved: int = 0,
         streak_days: int = 0,
+        peak_rating: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Compute authoritative chapter badges strictly based on performance metrics.
-        Badges map 1-to-1 to the official artwork in matiks_assets/badges:
-          - Novice (Novice.png): 10+ Solves & 1 Contest (or 15+ Solves)
-          - Amateur (Amateur.png): Rating >= 1400, 25+ Solves, 2+ Contests
-          - Candidate (Candidate.png): Rating >= 1600, 50+ Solves, 3+ Contests
-          - Expert (Expert.png): Rating >= 1800, 75+ Solves, 5+ Contests
-          - Master (Master.png): Rating >= 2000, 100+ Solves, 1+ Podium
-          - GrandMaster (GrandMaster.png): Rating >= 2200, 150+ Solves, 2+ Podiums
+        Compute authoritative chapter badges strictly based on contest rating.
+        Badges map 1-to-1 to official competitive division tiers and artwork:
+          - Novice (Novice.png): Rating >= 1200 & 1+ Official Contest
+          - Amateur (Amateur.png): Rating >= 1400 & 1+ Official Contest
+          - Candidate (Candidate.png): Rating >= 1600 & 1+ Official Contest
+          - Expert (Expert.png): Rating >= 1800 & 1+ Official Contest
+          - Master (Master.png): Rating >= 2000 & 1+ Official Contest
+          - GrandMaster (GrandMaster.png): Rating >= 2200 & 1+ Official Contest
+
+        Zero official tournament attendance (unranked) locks all badges.
         """
         r = rating or 1200
-        solves = total_solved or 0
+        eff_r = max(r, peak_rating or r)
         contests = attended or 0
-        pods = podiums or 0
+
+        # Badges derive exclusively from official contest ratings.
+        # Unranked cadets (0 official contests attended) have earned zero badges.
+        has_official_rank = contests >= 1
 
         return [
             {
@@ -291,9 +297,9 @@ class MemberService:
                 "icon": "⚡",
                 "image_url": "/matiks-assets/badges/Novice.png",
                 "badge_url": "/matiks-assets/badges/Novice.png",
-                "description": "Solved at least 10 competitive problems and participated in an official contest (or 15+ solved problems).",
-                "criteria": "10+ Solves & 1 Contest (or 15+ Solves)",
-                "earned": bool((solves >= 10 and contests >= 1) or solves >= 15),
+                "description": "Participated in an official campus tournament and established baseline contest rating ≥ 1200.",
+                "criteria": "Rating ≥ 1200 in Official Contests",
+                "earned": bool(has_official_rank and eff_r >= 1200),
             },
             {
                 "id": "badge_amateur",
@@ -303,9 +309,9 @@ class MemberService:
                 "icon": "🛡️",
                 "image_url": "/matiks-assets/badges/Amateur.png",
                 "badge_url": "/matiks-assets/badges/Amateur.png",
-                "description": "Attained rating ≥ 1400 with 25+ solved problems and 2+ official contest participations.",
-                "criteria": "Rating ≥ 1400, 25+ Solves, 2+ Contests",
-                "earned": bool(r >= 1400 and solves >= 25 and contests >= 2),
+                "description": "Attained official contest rating ≥ 1400 in campus tournaments.",
+                "criteria": "Rating ≥ 1400 in Official Contests",
+                "earned": bool(has_official_rank and eff_r >= 1400),
             },
             {
                 "id": "badge_candidate",
@@ -315,9 +321,9 @@ class MemberService:
                 "icon": "🎯",
                 "image_url": "/matiks-assets/badges/Candidate.png",
                 "badge_url": "/matiks-assets/badges/Candidate.png",
-                "description": "Attained rating ≥ 1600 with 50+ solved problems and 3+ official contest participations.",
-                "criteria": "Rating ≥ 1600, 50+ Solves, 3+ Contests",
-                "earned": bool(r >= 1600 and solves >= 50 and contests >= 3),
+                "description": "Attained official contest rating ≥ 1600 in campus tournaments.",
+                "criteria": "Rating ≥ 1600 in Official Contests",
+                "earned": bool(has_official_rank and eff_r >= 1600),
             },
             {
                 "id": "badge_expert",
@@ -327,9 +333,9 @@ class MemberService:
                 "icon": "🔥",
                 "image_url": "/matiks-assets/badges/Expert.png",
                 "badge_url": "/matiks-assets/badges/Expert.png",
-                "description": "Elite tier: Attained rating ≥ 1800 with 75+ solved problems and 5+ tournament battles.",
-                "criteria": "Rating ≥ 1800, 75+ Solves, 5+ Contests",
-                "earned": bool(r >= 1800 and solves >= 75 and contests >= 5),
+                "description": "Elite tier: Attained official contest rating ≥ 1800 in campus tournaments.",
+                "criteria": "Rating ≥ 1800 in Official Contests",
+                "earned": bool(has_official_rank and eff_r >= 1800),
             },
             {
                 "id": "badge_master",
@@ -339,9 +345,9 @@ class MemberService:
                 "icon": "🏆",
                 "image_url": "/matiks-assets/badges/Master.png",
                 "badge_url": "/matiks-assets/badges/Master.png",
-                "description": "Master tier: Attained rating ≥ 2000, 100+ solved problems, and secured at least 1 official podium.",
-                "criteria": "Rating ≥ 2000, 100+ Solves, 1+ Podium",
-                "earned": bool(r >= 2000 and solves >= 100 and pods >= 1),
+                "description": "Master tier: Attained official contest rating ≥ 2000 in campus tournaments.",
+                "criteria": "Rating ≥ 2000 in Official Contests",
+                "earned": bool(has_official_rank and eff_r >= 2000),
             },
             {
                 "id": "badge_grandmaster",
@@ -351,9 +357,9 @@ class MemberService:
                 "icon": "👑",
                 "image_url": "/matiks-assets/badges/GrandMaster.png",
                 "badge_url": "/matiks-assets/badges/GrandMaster.png",
-                "description": "Pinnacle GrandMaster: Attained rating ≥ 2200, 150+ problems solved, and multiple podium victories.",
-                "criteria": "Rating ≥ 2200, 150+ Solves, 2+ Podiums",
-                "earned": bool(r >= 2200 and solves >= 150 and pods >= 2),
+                "description": "Pinnacle GrandMaster: Attained official contest rating ≥ 2200 in campus tournaments.",
+                "criteria": "Rating ≥ 2200 in Official Contests",
+                "earned": bool(has_official_rank and eff_r >= 2200),
             },
         ]
 
@@ -363,10 +369,16 @@ class MemberService:
         cached = await get_cache(cache_key)
         if cached is not None:
             c_mem = cached.get("member") if isinstance(cached, dict) else None
-            if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0 and (c_mem.get("rating", 1200) or 1200) != 1200:
-                cached = None
-            else:
-                return cached
+            c_ach = cached.get("achievements") if isinstance(cached, dict) else None
+            # Invalidate stale cache where unranked members (0 attendance) had earned badges
+            if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0:
+                if c_ach and any(a.get("earned") for a in c_ach if isinstance(a, dict)):
+                    cached = None
+            if cached is not None:
+                if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0 and (c_mem.get("rating", 1200) or 1200) != 1200:
+                    cached = None
+                else:
+                    return cached
 
         campus_pass = await MemberRepository.get_active_campus_pass(db, current_member.id)
         followers_count, following_count = await MemberRepository.get_social_counts(db, current_member.id)
@@ -596,6 +608,7 @@ class MemberService:
             podiums=podiums,
             is_core_member=bool(current_member.is_core_member),
             total_solved=practice_problem_stats["problems"]["solved"],
+            peak_rating=current_member.peak_rating,
         )
         payload["achievements"] = achievements
 
@@ -620,10 +633,15 @@ class MemberService:
         cached = await get_cache(cache_key)
         if cached is not None:
             c_mem = cached.get("member") if isinstance(cached, dict) else None
-            if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0 and (c_mem.get("rating", 1200) or 1200) != 1200:
-                cached = None
-            else:
-                return cached
+            c_ach = cached.get("achievements") if isinstance(cached, dict) else None
+            if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0:
+                if c_ach and any(a.get("earned") for a in c_ach if isinstance(a, dict)):
+                    cached = None
+            if cached is not None:
+                if c_mem and (c_mem.get("attendance_count", 0) or 0) == 0 and (c_mem.get("rating", 1200) or 1200) != 1200:
+                    cached = None
+                else:
+                    return cached
 
         followers_count, following_count = await MemberRepository.get_social_counts(db, student.id)
         attended, total_contests = await MemberRepository.get_attendance_and_contest_counts(db, student.id)
@@ -879,6 +897,7 @@ class MemberService:
             podiums=podiums,
             is_core_member=bool(student.is_core_member),
             total_solved=practice_problem_stats["problems"]["solved"],
+            peak_rating=student.peak_rating,
         )
         payload["achievements"] = achievements
 

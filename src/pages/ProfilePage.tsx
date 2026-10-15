@@ -226,6 +226,7 @@ export function ProfilePage() {
     0;
   const achievements = computeAuthoritativeBadges({
     rating: m?.rating,
+    peak_rating: m?.peak_rating,
     attended: m?.attendance_count,
     podiums: m?.podiums,
     total_solved: cadetSolves,

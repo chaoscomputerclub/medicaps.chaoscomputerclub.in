@@ -231,6 +231,7 @@ export async function getMemberProfileData(force = false) {
             proofs: Array.isArray(data.proofs) ? data.proofs : [],
             achievements: computeAuthoritativeBadges({
               rating: memberObj.rating,
+              peak_rating: memberObj.peak_rating,
               attended: memberObj.attendance_count,
               podiums: memberObj.podiums,
               total_solved:
@@ -421,6 +422,7 @@ export async function getStudentProfileData(handle: string, force = false) {
             proofs: Array.isArray(data.proofs) ? data.proofs : [],
             achievements: computeAuthoritativeBadges({
               rating: memberObj?.rating ?? data.stats?.rating,
+              peak_rating: memberObj?.peak_rating ?? data.stats?.peak_rating,
               attended: memberObj?.attendance_count ?? data.stats?.attendance_count,
               podiums: memberObj?.podiums ?? data.stats?.podiums,
               total_solved:
