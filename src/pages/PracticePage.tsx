@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useTransition } from "react";
+import React, { useState, useEffect, useMemo, useTransition, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Search,
@@ -27,16 +27,32 @@ import { practiceApi } from "@/features/practice/api";
 import { useSwrData } from "@/lib/cache/swrCache";
 import type { PracticeProblemSummary, PracticeTopic, ProblemDifficulty } from "@/features/practice/types";
 
+const PAGE_SIZE = 20;
+
+function getPaginationItems(current: number, total: number): (number | "ellipsis")[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, "ellipsis", total];
+  }
+  if (current >= total - 3) {
+    return [1, "ellipsis", total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, "ellipsis", current - 1, current, current + 1, "ellipsis", total];
+}
+
 export function PracticePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const tableTopRef = useRef<HTMLDivElement>(null);
 
   // Read URL query parameters as single source of truth
   const queryParam = searchParams.get("q") || "";
   const difficultyParam = searchParams.get("difficulty") || "ALL";
   const topicParam = searchParams.get("topic") || "ALL";
   const statusParam = searchParams.get("status") || "ALL";
-  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+  const pageParam = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
 
   // Local state for snappy typing in search bar
   const [searchInput, setSearchInput] = useState(queryParam);
@@ -63,7 +79,7 @@ export function PracticePage() {
         topic: topicParam !== "ALL" ? topicParam : undefined,
         status: statusParam !== "ALL" ? statusParam : undefined,
         page: pageParam,
-        limit: 50,
+        limit: PAGE_SIZE,
       }),
     { ttl: 60 * 1000, staleTime: 10 * 1000 }
   );
@@ -81,13 +97,18 @@ export function PracticePage() {
     summary.total_problems ??
     listData?.total ??
     problems.length;
-  const totalPages = listData?.pages || Math.ceil(total / 50) || 1;
+  const totalPages = Math.max(
+    1,
+    listData?.pages || (listData as any)?.total_pages || Math.ceil(total / PAGE_SIZE) || 1
+  );
 
   // Filter update handler updating URL search params
   const updateFilter = (key: string, value: string) => {
     startTransition(() => {
       const nextParams = new URLSearchParams(searchParams);
-      if (!value || value === "ALL") {
+      if (key === "page" && (value === "1" || !value)) {
+        nextParams.delete("page");
+      } else if (!value || value === "ALL") {
         nextParams.delete(key);
       } else {
         nextParams.set(key, value);
@@ -305,7 +326,7 @@ export function PracticePage() {
       </section>
 
       {/* Problems Dense Table */}
-      <section className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden">
+      <section ref={tableTopRef} className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] overflow-hidden">
         {problems.length === 0 && !loading ? (
           <div className="py-16 text-center space-y-4 font-sans px-4 flex flex-col items-center justify-center">
             <div className="mb-2 flex items-center justify-center">
@@ -351,13 +372,13 @@ export function PracticePage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {loading ? (
-                  <PracticeRowSkeleton count={8} />
+                  <PracticeRowSkeleton count={10} />
                 ) : (
                   problems.map((p, idx) => {
                     const parsedNum = Number.parseInt(p.problem_index || "", 10);
                     const displayIndex = !Number.isNaN(parsedNum) && parsedNum > 0
                       ? parsedNum
-                      : (pageParam - 1) * 50 + idx + 1;
+                      : (pageParam - 1) * PAGE_SIZE + idx + 1;
                     const userStatus = p.user_status || (p as any).solved_status;
                     return (
                     <tr
@@ -440,28 +461,71 @@ export function PracticePage() {
 
         {/* Pagination Bar */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t border-white/8 font-sans text-xs text-zinc-400">
-            <div>
-              Page <strong className="text-white tabular-nums">{pageParam}</strong> of{" "}
-              <strong className="text-white tabular-nums">{totalPages}</strong>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-white/8 font-sans text-xs text-zinc-400">
+            <div className="tabular-nums">
+              Showing <strong className="text-white">{total === 0 ? 0 : (pageParam - 1) * PAGE_SIZE + 1}</strong>
+              –<strong className="text-white">{Math.min(pageParam * PAGE_SIZE, total)}</strong> of{" "}
+              <strong className="text-white">{total}</strong> questions
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 disabled={pageParam <= 1}
-                onClick={() => updateFilter("page", String(pageParam - 1))}
-                className="px-3 py-1.5 rounded-[10px] bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer transition-colors font-heading font-bold uppercase tracking-wider text-xs"
+                onClick={() => {
+                  updateFilter("page", String(pageParam - 1));
+                  tableTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="h-8 px-2.5 rounded-[8px] bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer transition-colors font-heading font-bold uppercase tracking-wider text-[11px]"
+                aria-label="Previous Page"
               >
                 <ChevronLeft className="size-3.5" />
-                Previous
+                <span className="hidden sm:inline">Prev</span>
               </button>
+
+              <div className="flex items-center gap-1">
+                {getPaginationItems(pageParam, totalPages).map((item, idx) => {
+                  if (item === "ellipsis") {
+                    return (
+                      <span key={`ellipsis-${idx}`} className="px-1.5 py-0.5 text-zinc-500 font-mono text-xs select-none">
+                        …
+                      </span>
+                    );
+                  }
+                  const isCurrent = item === pageParam;
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      aria-current={isCurrent ? "page" : undefined}
+                      onClick={() => {
+                        if (!isCurrent) {
+                          updateFilter("page", String(item));
+                          tableTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                      }}
+                      className={`min-w-[32px] h-8 px-2 rounded-[8px] border text-xs font-mono tabular-nums transition-colors cursor-pointer ${
+                        isCurrent
+                          ? "bg-white/10 text-white border-white/25 font-bold shadow-sm"
+                          : "bg-[#171717] text-zinc-400 border-white/[0.08] hover:bg-white/[0.08] hover:text-white hover:border-white/20"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
+              </div>
+
               <button
                 type="button"
                 disabled={pageParam >= totalPages}
-                onClick={() => updateFilter("page", String(pageParam + 1))}
-                className="px-3 py-1.5 rounded-[10px] bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer transition-colors font-heading font-bold uppercase tracking-wider text-xs"
+                onClick={() => {
+                  updateFilter("page", String(pageParam + 1));
+                  tableTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="h-8 px-2.5 rounded-[8px] bg-[#171717] border border-white/[0.08] hover:bg-white/[0.08] text-zinc-300 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer transition-colors font-heading font-bold uppercase tracking-wider text-[11px]"
+                aria-label="Next Page"
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="size-3.5" />
               </button>
             </div>

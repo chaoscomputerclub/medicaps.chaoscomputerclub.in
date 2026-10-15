@@ -78,7 +78,7 @@ import {
   decrementTimer,
   dismissAntiCheatWarning,
 } from "@/store/slices/assessmentSlice";
-import { AssessmentStudioSkeleton } from "@/organization/components/skeletons";
+import { AssessmentStudioSkeleton, MonacoEditorSkeleton } from "@/organization/components/skeletons";
 
 const ASSESSMENT_LANGUAGES: { value: SupportedLanguage; label: string }[] = [
   { value: "python", label: "Python 3" },
@@ -718,25 +718,7 @@ export function AssessmentWorkspacePage() {
         <div className="w-1/2 flex flex-col bg-[#171717]">
           {/* Editor Container */}
           <div className="flex-1 relative overflow-hidden bg-[#171717]">
-            <Suspense
-              fallback={
-                <div className="h-full w-full bg-[#171717] text-zinc-600 font-mono text-[13px] p-4 flex select-none overflow-hidden">
-                  <div className="w-8 border-r border-white/5 pr-3 text-right text-zinc-600/50 space-y-1">
-                    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div>
-                  </div>
-                  <div className="pl-4 space-y-2 flex-1">
-                    <div className="h-3.5 bg-zinc-800/60 rounded w-1/4 animate-pulse" />
-                    <div className="h-3.5 bg-zinc-800/40 rounded w-2/5 animate-pulse" />
-                    <div className="h-3.5 bg-zinc-800/30 rounded w-1/3 animate-pulse" />
-                    <div className="h-3.5 bg-zinc-800/50 rounded w-1/2 animate-pulse" />
-                    <div className="pt-2 text-xs text-zinc-500 font-sans flex items-center gap-2">
-                      <span className="inline-block size-2 rounded-full bg-[#B1FA63] animate-ping" />
-                      <span>Readying editor environment…</span>
-                    </div>
-                  </div>
-                </div>
-              }
-            >
+            <Suspense fallback={<MonacoEditorSkeleton />}>
               <MonacoEditor
                 value={currentCode}
                 language={selectedLanguage}

@@ -321,13 +321,15 @@ class PracticeService:
         user_summary["total_problems"] = total_published
         user_summary["total_published"] = total_published
 
+        total_pages_count = (total_matching + limit - 1) // limit if limit > 0 else 1
         return {
             "problems": items,
             "items": items,
             "total": total_matching,
             "page": page,
             "limit": limit,
-            "total_pages": (total_matching + limit - 1) // limit if limit > 0 else 1,
+            "pages": total_pages_count,
+            "total_pages": total_pages_count,
             "summary": user_summary,
         }
 

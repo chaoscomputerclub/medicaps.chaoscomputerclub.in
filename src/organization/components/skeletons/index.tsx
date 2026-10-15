@@ -6,9 +6,10 @@
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MonacoEditorSkeleton } from "./MonacoEditorSkeleton";
 import { cn } from "@/lib/utils";
 
-export { Skeleton };
+export { Skeleton, MonacoEditorSkeleton };
 
 /* -------------------------------------------------------------------------- */
 /* 1. Component Primitives & Micro Skeletons                                  */
@@ -1672,13 +1673,8 @@ export function AssessmentStudioSkeleton() {
               <Skeleton className="h-7 w-7 rounded-[8px]" />
             </div>
           </div>
-          <div className="flex-1 p-4 space-y-2">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-              <div key={i} className="flex gap-4">
-                <Skeleton className="h-3 w-6" />
-                <Skeleton className="h-3" style={{ width: `${((i * 37) % 60) + 30}%` }} />
-              </div>
-            ))}
+          <div className="flex-1 min-h-0 relative">
+            <MonacoEditorSkeleton />
           </div>
           <div className="border-t border-white/8 p-3 flex justify-between items-center bg-[#171717]">
             <Skeleton className="h-7 w-24 rounded-md" />

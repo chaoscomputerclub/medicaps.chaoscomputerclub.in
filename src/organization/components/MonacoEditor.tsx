@@ -75,6 +75,9 @@ interface MonacoEditorProps {
   tabSize?: number;
 }
 
+import { MonacoEditorSkeleton } from "./skeletons/MonacoEditorSkeleton";
+export { MonacoEditorSkeleton };
+
 export const MonacoEditor = memo(function MonacoEditor({
   value,
   language,
@@ -117,11 +120,7 @@ export const MonacoEditor = memo(function MonacoEditor({
         onChange={handleChange}
         beforeMount={(mon) => mon.editor.defineTheme("ccc-dark", CCC_DARK_THEME)}
         onMount={handleMount}
-        loading={
-          <div className="p-4 text-xs font-sans text-zinc-500 animate-pulse">
-            Initializing terminal code editor…
-          </div>
-        }
+        loading={<MonacoEditorSkeleton />}
         options={{
           fontSize,
           fontFamily: "'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace",
