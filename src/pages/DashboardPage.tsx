@@ -13,6 +13,7 @@ import {
 import { type FullProfilePayload } from "@/organization/data/queries";
 import { getPublicPortalData, getMemberProfileData } from "@/organization/data/portal.functions";
 import { ContestActivityFeed } from "@/features/contest/feed";
+import { practiceApi } from "@/features/practice/api";
 import { isAuthenticated } from "@/lib/auth";
 import { useSwrData, globalSwrStore } from "@/lib/cache/swrCache";
 import { markNavigationMount, markNavigationContentReady } from "@/lib/navigationTelemetry";
@@ -41,6 +42,12 @@ export function DashboardPage() {
     { ttl: 5 * 60 * 1000, staleTime: 30 * 1000, enabled: authed }
   );
 
+  const { data: practiceStatsData, revalidate: revalidatePracticeStats } = useSwrData(
+    authed ? "practice:stats:me" : null,
+    () => practiceApi.getStats(),
+    { ttl: 2 * 60 * 1000, staleTime: 30 * 1000, enabled: authed }
+  );
+
   const { data: publicDataRaw, loading: publicLoading, revalidate: revalidatePublic } = useSwrData<{
     contests: OfflineContest[];
     announcements: AnnouncementFeedItem[];
@@ -67,10 +74,11 @@ export function DashboardPage() {
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     refreshTimerRef.current = setTimeout(() => {
       revalidateProfile();
+      revalidatePracticeStats();
       revalidatePublic();
       dispatch(fetchContestsThunk(true));
     }, 500);
-  }, [dispatch, revalidateProfile, revalidatePublic]);
+  }, [dispatch, revalidateProfile, revalidatePracticeStats, revalidatePublic]);
 
   useEffect(() => {
     return () => {
@@ -153,6 +161,7 @@ export function DashboardPage() {
     } : {}),
   };
   const history = profile?.ratingHistory || [];
+  const problemStats = practiceStatsData || profile?.problem_stats || (profile as any)?.problemStats;
   const live = contests.find((c) => c.status === "live");
   const next = contests
     .filter((c) => c.status === "upcoming")
@@ -214,10 +223,10 @@ export function DashboardPage() {
         <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
           <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Problems Solved</span>
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
-            {profile?.problem_stats?.problems?.solved ?? (profile?.problemStats as any)?.total_solved ?? (member as any)?.solved_count ?? 0}
+            {problemStats?.problems?.solved ?? (problemStats as any)?.total_solved ?? (member as any)?.solved_count ?? 0}
           </strong>
           <span className="block text-xs font-sans text-zinc-500 mt-1 truncate">
-            {profile?.problem_stats?.problems?.attempted ?? (profile?.problemStats as any)?.total_submissions ?? 0} Attempted · Practice
+            {problemStats?.problems?.attempted ?? (problemStats as any)?.total_submissions ?? 0} Attempted · Practice
           </span>
         </div>
       </div>
@@ -230,13 +239,13 @@ export function DashboardPage() {
             <span className="font-heading font-bold text-xs uppercase tracking-wider text-[#B1FA63]">Coding Practice</span>
           </div>
           <div className="text-sm font-semibold text-white font-sans flex items-center gap-3 flex-wrap">
-            <span>{profile?.problem_stats?.problems?.solved ?? 0} Solved</span>
+            <span>{problemStats?.problems?.solved ?? (problemStats as any)?.total_solved ?? 0} Solved</span>
             <span className="text-zinc-600">·</span>
-            <span className="text-zinc-400">{profile?.problem_stats?.problems?.attempted ?? 0} Attempted</span>
+            <span className="text-zinc-400">{problemStats?.problems?.attempted ?? (problemStats as any)?.total_submissions ?? 0} Attempted</span>
             <span className="text-zinc-600">·</span>
-            <span className="text-emerald-400">Easy: {profile?.problem_stats?.difficulty?.easy?.solved ?? 0}</span>
-            <span className="text-amber-400">Med: {profile?.problem_stats?.difficulty?.medium?.solved ?? 0}</span>
-            <span className="text-rose-400">Hard: {profile?.problem_stats?.difficulty?.hard?.solved ?? 0}</span>
+            <span className="text-emerald-400">Easy: {problemStats?.difficulty?.easy?.solved ?? (problemStats as any)?.easy_solved ?? 0}</span>
+            <span className="text-amber-400">Med: {problemStats?.difficulty?.medium?.solved ?? (problemStats as any)?.medium_solved ?? 0}</span>
+            <span className="text-rose-400">Hard: {problemStats?.difficulty?.hard?.solved ?? (problemStats as any)?.hard_solved ?? 0}</span>
           </div>
         </div>
         <Button asChild variant="outline" size="sm" className="shrink-0 font-heading font-bold text-xs">

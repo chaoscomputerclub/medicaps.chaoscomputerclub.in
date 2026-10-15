@@ -239,6 +239,8 @@ export async function getMemberProfileData(force = false) {
                 0,
               rawAchievements: data.achievements,
             }),
+            problem_stats: data.problem_stats || null,
+            problemStats: data.problemStats || null,
           };
         }
       } catch {
@@ -255,6 +257,8 @@ export async function getMemberProfileData(force = false) {
         campusPass: null,
         proofs: [],
         achievements: [],
+        problem_stats: null,
+        problemStats: null,
       };
     },
     {
@@ -425,6 +429,7 @@ export async function getStudentProfileData(handle: string, force = false) {
                 0,
               rawAchievements: data.achievements,
             }),
+            problem_stats: data.problem_stats || null,
           };
         }
       } catch (err) {
