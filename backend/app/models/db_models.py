@@ -36,6 +36,14 @@ from .announcement import Announcement
 from .version import ResourceVersion
 from .judge_job import JudgeJob, JudgeJobAttempt
 from app.core.queue.outbox import OutboxEvent
+from .interview import (
+    InterviewSession,
+    InterviewQuestion,
+    InterviewAnswer,
+    InterviewEvaluation,
+    InterviewReport,
+    CandidateProfile,
+)
 
 __all__ = [
     "Base",
@@ -65,5 +73,11 @@ __all__ = [
     "OutboxEvent",
     "JudgeJob",
     "JudgeJobAttempt",
+    "InterviewSession",
+    "InterviewQuestion",
+    "InterviewAnswer",
+    "InterviewEvaluation",
+    "InterviewReport",
+    "CandidateProfile",
 ]
 

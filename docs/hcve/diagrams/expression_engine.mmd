@@ -1,0 +1,18 @@
+flowchart TD
+    A["LLM Response Plan"] --> B["Expression Schema Validator"]
+    B --> C["Expression Interpreter"]
+    C --> D["Personality Controller"]
+    C --> E["Tone Controller"]
+    C --> F["Emotion Controller"]
+    C --> G["Delivery Controller"]
+    C --> H["Prosody Controller"]
+    C --> I["Language Controller"]
+    D --> J["Expression Resolver"]
+    E --> J
+    F --> J
+    G --> J
+    H --> J
+    I --> J
+    J --> K["TTS Capability Mapper"]
+    K --> L["Normalized Speech Instructions"]
+    L --> M["Speech Renderer"]

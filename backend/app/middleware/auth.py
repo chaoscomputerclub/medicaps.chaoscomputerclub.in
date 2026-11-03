@@ -34,7 +34,7 @@ def extract_access_token(request: Request, bearer_token: Optional[str] = None) -
     Extract access token honoring security priority:
     1. HttpOnly 'access_token' cookie (browser clients)
     2. Authorization header / OAuth2 Bearer scheme (CLI, cURL, automated tests)
-    3. Query parameter '?token=...' (SSE streams or media downloads)
+    (URL query parameter access tokens are strictly forbidden for standard API endpoints).
     """
     cookie_token = request.cookies.get("access_token")
     if cookie_token and cookie_token.strip():
@@ -44,9 +44,6 @@ def extract_access_token(request: Request, bearer_token: Optional[str] = None) -
     auth_hdr = request.headers.get("Authorization") or request.headers.get("authorization")
     if auth_hdr and auth_hdr.lower().startswith("bearer "):
         return auth_hdr[7:].strip()
-    query_token = request.query_params.get("token")
-    if query_token and query_token.strip():
-        return query_token.strip()
     return None
 
 
@@ -79,34 +76,6 @@ async def get_current_member(
         result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
         member = result.scalars().first()
 
-    # If the user is designated in ENV Core Team, auto-provision or elevate them dynamically
-    if not member and email and email.strip().lower() in settings.core_team_emails_set:
-        import uuid
-        clean_email = email.strip().lower()
-        handle_prefix = clean_email.split("@")[0].replace(".", "_")
-        member = MemberProfile(
-            id=member_id or str(uuid.uuid4()),
-            email=clean_email,
-            handle=handle_prefix,
-            full_name=handle_prefix.replace("_", " ").title(),
-            is_core_member=True,
-            is_onboarded=True,
-            rating=1200,
-            peak_rating=1200,
-        )
-        db.add(member)
-        await db.commit()
-        await db.refresh(member)
-        logger.info("Auto-provisioned Core Team member from ENV: %s", clean_email)
-
-    if member:
-        clean_email = (member.email or "").strip().lower()
-        clean_handle = (member.handle or "").strip().lower()
-        if not member.is_core_member and (clean_email in settings.core_team_emails_set or clean_handle in settings.core_team_handles_set):
-            member.is_core_member = True
-            await db.commit()
-            await db.refresh(member)
-
     if not member:
         logger.warning(
             "JWT resolved to no DB member (sub=%s, email=%s) — forcing re-auth.",
@@ -135,86 +104,63 @@ async def get_current_member_optional(
     token: Optional[str] = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> Optional[MemberProfile]:
-    """Optional auth dependency — returns None if token missing or invalid."""
+    """
+    Optional auth dependency — returns None if token missing or invalid.
+    Strictly read-only; never mutates DB state and never swallows infrastructure outages.
+    """
     raw_token = extract_access_token(request, token)
     if not raw_token:
         return None
+
     try:
         payload = decode_access_token(raw_token)
-        if not payload:
-            return None
-        member_id: Optional[str] = payload.get("sub")
-        email: Optional[str] = payload.get("email")
-        if not member_id and not email:
-            return None
-
-        member = None
-        if member_id:
-            result = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
-            member = result.scalars().first()
-
-        if not member and email:
-            result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
-            member = result.scalars().first()
-
-        if not member and email and email.strip().lower() in settings.core_team_emails_set:
-            import uuid
-            clean_email = email.strip().lower()
-            handle_prefix = clean_email.split("@")[0].replace(".", "_")
-            member = MemberProfile(
-                id=member_id or str(uuid.uuid4()),
-                email=clean_email,
-                handle=handle_prefix,
-                full_name=handle_prefix.replace("_", " ").title(),
-                is_core_member=True,
-                is_onboarded=True,
-                rating=1200,
-                peak_rating=1200,
-            )
-            db.add(member)
-            await db.commit()
-            await db.refresh(member)
-
-        if member:
-            clean_email = (member.email or "").strip().lower()
-            clean_handle = (member.handle or "").strip().lower()
-            if not member.is_core_member and (clean_email in settings.core_team_emails_set or clean_handle in settings.core_team_handles_set):
-                member.is_core_member = True
-                await db.commit()
-                await db.refresh(member)
-
-        return member
-    except Exception:
+    except Exception as e:
+        logger.debug("Failed decoding access token in optional auth: %s", e)
         return None
+
+    if not payload:
+        return None
+
+    member_id: Optional[str] = payload.get("sub")
+    email: Optional[str] = payload.get("email")
+    if not member_id and not email:
+        return None
+
+    member = None
+    if member_id:
+        result = await db.execute(select(MemberProfile).where(MemberProfile.id == member_id))
+        member = result.scalars().first()
+
+    if not member and email:
+        result = await db.execute(select(MemberProfile).where(MemberProfile.email == email.strip().lower()))
+        member = result.scalars().first()
+
+    return member
 
 
 async def require_admin_or_core(
-    member: Optional[MemberProfile] = Depends(get_current_member_optional),
-) -> Optional[MemberProfile]:
+    member: Optional[MemberProfile] = Depends(get_current_member),
+) -> MemberProfile:
     """
     Guards organizer/admin endpoints.
     Permits execution if:
     - User is authenticated with `is_core_member` set to True
-    - User matches designated Core Team / Chief Proctor roster in ENV (auto-elevated)
+    - User matches designated Core Team email allowlist in ENV
     - Development bypass is honored only outside production.
+    (Handle-based elevation is strictly forbidden).
     """
     from app.core.config import settings
 
     if settings.is_dev_bypass_enabled and not settings.is_production:
-        return member
+        if member:
+            return member
 
     if not member:
         raise _UNAUTHORIZED
 
     email_clean = (member.email or "").strip().lower()
-    handle_clean = (member.handle or "").strip().lower()
 
-    if (
-        email_clean in settings.core_team_emails_set
-        or handle_clean in settings.core_team_handles_set
-    ):
-        if not getattr(member, "is_core_member", False):
-            member.is_core_member = True
+    if settings.core_team_emails_set and email_clean in settings.core_team_emails_set:
         return member
 
     if not getattr(member, "is_core_member", False):

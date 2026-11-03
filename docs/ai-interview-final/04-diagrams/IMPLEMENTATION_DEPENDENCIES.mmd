@@ -1,0 +1,11 @@
+flowchart TD
+  Audit[Baseline + Test Environment] --> Migration[DB Migration]
+  Migration --> Provider[Provider Safety]
+  Provider --> Graph[Durable LangGraph]
+  Graph --> Lifecycle[Lifecycle + Idempotency]
+  Lifecycle --> Resume[Resume Intelligence]
+  Lifecycle --> Voice[Authenticated HCVE Voice]
+  Resume --> UI[Frontend Integration]
+  Voice --> UI
+  UI --> QA[Security + E2E + Load Tests]
+  QA --> Release[Staged Production Release]

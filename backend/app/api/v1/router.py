@@ -13,6 +13,7 @@ from app.routers import (
     auth,
     contests,
     feed,
+    interview,
     jobs,
     leaderboard,
     passes,
@@ -25,6 +26,8 @@ from app.routers import (
     metrics,
     nodes,
     fabric,
+    hcve,
+    admin_interview,
 )
 
 api_router_v1 = APIRouter()
@@ -41,11 +44,15 @@ for domain_router in (
     social.router,
     storage.router,
     practice.router,
+    interview.router,
+    interview.canonical_interview_router,
+    admin_interview.router,
     jobs.router,
     workers.router,
     metrics.router,
     nodes.router,
     fabric.router,
+    hcve.router,
 ):
     api_router_v1.include_router(domain_router)
 

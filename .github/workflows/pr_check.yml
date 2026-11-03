@@ -35,12 +35,15 @@ jobs:
         run: npm ci
 
       - name: 🔍 TypeScript Static Type Checking
+        id: ts-check
         run: npx tsc --noEmit
 
       - name: 🏗️ Compile Student Portal Web Bundle
+        id: vite-build
         run: npm run build
 
       - name: 🔘 Audit Interactive UI Elements & Buttons
+        id: ui-audit
         run: node scripts/audit_ui_elements_backend_connectivity.mjs
 
       - name: 📋 Post Frontend Gate Summary
@@ -49,9 +52,9 @@ jobs:
           echo "### 🎨 Frontend Quality Gate" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :---: |" >> $GITHUB_STEP_SUMMARY
-          echo "| TypeScript Static Analysis (\`tsc --noEmit\`) | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Student Portal Production Bundle (\`vite build\`) | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Interactive Buttons & Backend Connectivity Audit | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript Static Analysis (\`tsc --noEmit\`) | ${{ steps.ts-check.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Student Portal Production Bundle (\`vite build\`) | ${{ steps.vite-build.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Interactive Buttons & Backend Connectivity Audit | ${{ steps.ui-audit.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
 
   # ─── JOB 2: PLAYWRIGHT E2E & ACCESSIBILITY TESTS ─────────────────────────────
   playwright-e2e-gate:
@@ -76,6 +79,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: 🧪 Execute Playwright E2E & Accessibility Suite
+        id: playwright-test
         run: npx playwright test
 
       - name: 📤 Upload Playwright Test Report Artifacts
@@ -92,12 +96,7 @@ jobs:
           echo "### 🎭 Playwright E2E & WCAG Accessibility Gate" >> $GITHUB_STEP_SUMMARY
           echo "| Test Spec | Scope | Status |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- | :---: |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`tests/e2e/contests_flow.spec.ts\` | Contests Hub & LightRays Mounting | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`tests/e2e/dead_ui_and_interactions.spec.ts\` | Dead-UI & Interaction Triggers | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`tests/e2e/accessibility.spec.ts\` | WCAG 2.2 AA Compliance Audit | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`tests/e2e/runtime_telemetry.spec.ts\` | Error Boundary & 5xx Sentinel | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`tests/e2e/zero_lag_navigation.spec.ts\` | Zero-Lag Transition & Fast Sequential Navigation | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`tests/e2e/inter_navigation.spec.ts\` | Full Platform Inter-Page & Subpage Navigation | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Playwright E2E & WCAG Suite | Full interactive browser test suite | ${{ steps.playwright-test.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
 
   # ─── JOB 3: BACKEND API QA & CONTRACT VERIFICATION ───────────────────────────
   backend-qa-gate:
@@ -152,9 +151,11 @@ jobs:
           chmod 600 backend/keys/jwt_private_key.pem
 
       - name: 🔍 Python Code Compilation Check
+        id: py-compile
         run: python3 -m compileall backend/app backend/main.py
 
       - name: 🗄️ Initialize PostgreSQL Schema & Tables
+        id: init-db
         env:
           PYTHONPATH: backend
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
@@ -166,6 +167,7 @@ jobs:
           python3 -c "import asyncio; from app.core.db import init_db; asyncio.run(init_db())"
 
       - name: 🚀 Execute Real-Time Cache Synchronization Suite (27 Tests)
+        id: test-cache-sync
         env:
           PYTHONPATH: backend
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
@@ -176,6 +178,7 @@ jobs:
         run: pytest backend/tests/test_cache_sync_engine.py backend/tests/test_cache_sync_deep_dive.py -v
 
       - name: ⚡ Execute ChaosQueue Async Architecture & DLQ Tests (10 Tests)
+        id: test-queue
         env:
           PYTHONPATH: backend
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
@@ -186,6 +189,7 @@ jobs:
         run: pytest backend/tests/test_async_queue_architecture.py -v
 
       - name: 🔒 Execute Cookie Auth & Cloudflare Security Tests (12 Tests)
+        id: test-cookie-auth
         env:
           PYTHONPATH: backend
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
@@ -196,6 +200,7 @@ jobs:
         run: pytest backend/tests/test_cookie_auth.py backend/tests/test_cloudflare_security.py -v
 
       - name: 🔄 Execute Contest Registration State Consistency Suite (5 Tests)
+        id: test-contest-consistency
         env:
           PYTHONPATH: backend
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
@@ -206,6 +211,7 @@ jobs:
         run: pytest backend/tests/test_contest_registration_consistency.py -v
 
       - name: 🛡️ Execute Historical Invariant Regression Suite (Mandatory CI Gate)
+        id: test-regression
         env:
           PYTHONPATH: backend
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/ccc_medicaps
@@ -221,9 +227,9 @@ jobs:
           echo "### 🛡️ Backend Quality Gate" >> $GITHUB_STEP_SUMMARY
           echo "| Test Suite | Scope | Status |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- | :---: |" >> $GITHUB_STEP_SUMMARY
-          echo "| Python AST & Bytecode Compilation | Clean syntax & byte-compile backend/ | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Real-Time Cache Synchronization Engine | 27 Monotonic CAS, Invalidation, SWR & Concurrency Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| ChaosQueue Async Engine & DLQ | 10 Job Lifecycle, Outbox Relay & Locking Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Cookie Auth & Cloudflare Security | 12 HttpOnly Rotation & Turnstile Protection Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Contest Registration State Consistency | 5 Dual-Write, Invalidation & Outbox Tests | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Historical Invariant Regression Suite | 40 Executable Invariant Tests (Zero Regressions Allowed) | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Python AST & Bytecode Compilation | Clean syntax & byte-compile backend/ | ${{ steps.py-compile.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Real-Time Cache Synchronization Engine | 27 Monotonic CAS, Invalidation, SWR & Concurrency Tests | ${{ steps.test-cache-sync.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ChaosQueue Async Engine & DLQ | 10 Job Lifecycle, Outbox Relay & Locking Tests | ${{ steps.test-queue.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cookie Auth & Cloudflare Security | 12 HttpOnly Rotation & Turnstile Protection Tests | ${{ steps.test-cookie-auth.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Contest Registration State Consistency | 5 Dual-Write, Invalidation & Outbox Tests | ${{ steps.test-contest-consistency.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Historical Invariant Regression Suite | 40+ Executable Invariant Tests | ${{ steps.test-regression.outcome == 'success' && '✅ PASS' || '❌ FAIL' }} |" >> $GITHUB_STEP_SUMMARY

@@ -16,9 +16,11 @@ load_dotenv(BASE_DIR / ".env", override=True)
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Arena API")
-    VERSION: str = os.getenv("VERSION", "1.3.8")
+    VERSION: str = os.getenv("VERSION", "1.6.0")
     API_PREFIX: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
+    PROCESS_ROLE: str = os.getenv("PROCESS_ROLE", "combined").strip().lower()
+    ENABLE_API_DOCS: bool = os.getenv("ENABLE_API_DOCS", "false").lower() in ("true", "1", "yes")
 
     # Host & Port
     HOST: str = os.getenv("HOST", "0.0.0.0")
@@ -29,8 +31,8 @@ class Settings(BaseSettings):
         "DATABASE_URL",
         "postgresql+asyncpg://postgres:postgres@localhost:5432/arena_dev"
     )
-    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "20"))
-    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
+    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "10"))
     DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
     DB_POOL_RECYCLE: int = int(os.getenv("DB_POOL_RECYCLE", "1800"))
 
@@ -45,24 +47,18 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
 
-    # Core Team & Chief Proctor Access Control (ENV Driven)
+    # Core Team & Chief Proctor Access Control (ENV Driven - Fails closed if not set)
     ALLOWED_EMAIL_DOMAIN: str = os.getenv("ALLOWED_EMAIL_DOMAIN", "medicaps.ac.in")
     CONTACT_EMAIL: Optional[str] = os.getenv("CONTACT_EMAIL", "info@chaoscomputerclub.in")
-    CORE_TEAM_EMAILS: Optional[str] = os.getenv(
-        "CORE_TEAM_EMAILS",
-        "en23cs301927@medicaps.ac.in,santushtkotai@gmail.com,info@chaoscomputerclub.in,qa.organizer@medicaps.ac.in",
-    )
-    CORE_TEAM_HANDLES: Optional[str] = os.getenv(
-        "CORE_TEAM_HANDLES",
-        "santusht,admin,core,proctor,qa_organizer",
-    )
-    ADMIN_PRIMARY_EMAIL: Optional[str] = os.getenv("ADMIN_PRIMARY_EMAIL", "en23cs301927@medicaps.ac.in")
-    QA_ORGANIZER_EMAIL: Optional[str] = os.getenv("QA_ORGANIZER_EMAIL", "qa.organizer@medicaps.ac.in")
-    QA_TARGET_EMAIL: Optional[str] = os.getenv("QA_TARGET_EMAIL", "qa.target@medicaps.ac.in")
+    CORE_TEAM_EMAILS: Optional[str] = os.getenv("CORE_TEAM_EMAILS", "")
+    CORE_TEAM_HANDLES: Optional[str] = os.getenv("CORE_TEAM_HANDLES", "")
+    ADMIN_PRIMARY_EMAIL: Optional[str] = os.getenv("ADMIN_PRIMARY_EMAIL", None)
+    QA_ORGANIZER_EMAIL: Optional[str] = os.getenv("QA_ORGANIZER_EMAIL", None)
+    QA_TARGET_EMAIL: Optional[str] = os.getenv("QA_TARGET_EMAIL", None)
 
     @cached_property
     def core_team_emails_set(self) -> set:
-        raw = self.CORE_TEAM_EMAILS or os.getenv("CORE_TEAM_EMAILS") or "en23cs301927@medicaps.ac.in,santushtkotai@gmail.com,info@chaoscomputerclub.in,qa.organizer@medicaps.ac.in"
+        raw = self.CORE_TEAM_EMAILS if self.CORE_TEAM_EMAILS is not None else (os.getenv("CORE_TEAM_EMAILS") or "")
         return {
             e.strip().lower()
             for e in raw.split(",")
@@ -71,7 +67,7 @@ class Settings(BaseSettings):
 
     @cached_property
     def core_team_handles_set(self) -> set:
-        raw = self.CORE_TEAM_HANDLES or os.getenv("CORE_TEAM_HANDLES") or "santusht,admin,core,proctor,qa_organizer"
+        raw = self.CORE_TEAM_HANDLES if self.CORE_TEAM_HANDLES is not None else (os.getenv("CORE_TEAM_HANDLES") or "")
         return {
             h.strip().lower()
             for h in raw.split(",")
@@ -185,6 +181,9 @@ class Settings(BaseSettings):
     MINIO_BUCKET_NAME: str = os.getenv("MINIO_BUCKET_NAME", "arena-media")
     MINIO_SECURE: bool = os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
     MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "")
+
+    # Voice & Speech Engine (HCVE)
+    SARVAM_API_KEY: str = os.getenv("SARVAM_API_KEY", "")
 
     @property
     def is_production(self) -> bool:

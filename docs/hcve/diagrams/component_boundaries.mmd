@@ -1,0 +1,31 @@
+flowchart LR
+    subgraph Runtime["Runtime Boundary"]
+      Session["Session Manager"]
+      Transport["Audio Transport"]
+      Events["Event Dispatcher"]
+      Cancel["Cancellation Coordinator"]
+    end
+    subgraph Intelligence["Intelligence Boundary"]
+      Dialogue["Dialogue State"]
+      Context["Context Builder"]
+      Planner["Response Planner"]
+      LLM["LLM Adapter"]
+    end
+    subgraph Expression["Expression Boundary"]
+      Persona["Persona"]
+      Controllers["Tone / Emotion / Delivery / Prosody"]
+      Resolver["Expression Resolver"]
+      Mapper["Capability Mapper"]
+    end
+    subgraph Media["Media Boundary"]
+      VAD["VAD / Endpointing"]
+      STT["STT Adapter"]
+      TTS["TTS Adapter"]
+      Stream["Audio Sequencer"]
+    end
+    Transport --> VAD --> STT --> Dialogue
+    Dialogue --> Context --> LLM --> Planner
+    Planner --> Persona --> Controllers --> Resolver --> Mapper --> TTS --> Stream --> Transport
+    Events <--> Dialogue
+    Cancel --> LLM
+    Cancel --> TTS

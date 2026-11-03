@@ -1,0 +1,11 @@
+flowchart TD
+    Backlog["Product Backlog"] --> Ready{"Definition of Ready met?"}
+    Ready -->|No| Refine["Refine story / contracts / diagrams"]
+    Refine --> Backlog
+    Ready -->|Yes| Dev["In Progress"]
+    Dev --> Review["Code Review"]
+    Review --> QA["QA + acceptance tests"]
+    QA --> Pass{"Acceptance passed?"}
+    Pass -->|No| Dev
+    Pass -->|Yes| Docs["Update docs / diagrams / ADR"]
+    Docs --> Done["Done / demo / release notes"]

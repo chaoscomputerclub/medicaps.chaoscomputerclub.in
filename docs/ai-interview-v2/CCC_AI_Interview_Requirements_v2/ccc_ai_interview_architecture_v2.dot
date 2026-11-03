@@ -1,0 +1,29 @@
+
+digraph G {
+  graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.48", labelloc="t", label="CCC AI Interview — Target Architecture", fontsize=18, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#f7f8fa", color="#586174", fontname="Arial", fontsize=10, margin="0.16,0.10"];
+  edge [color="#586174", arrowsize=0.7, fontname="Arial", fontsize=9];
+  candidate [label="Candidate"];
+  ui [label="React + Vite UI"];
+  api [label="FastAPI API\\nAuth • ownership • validation"];
+  orch [label="LangGraph Orchestrator\\nState • routing • checkpointing", fillcolor="#e8eefc"];
+  ctx [label="Candidate Context Retriever"];
+  llm [label="LLM Provider Adapter"];
+  eval [label="Evidence + Rubric Evaluator"];
+  db [shape=cylinder, label="PostgreSQL\\nAuthoritative state"];
+  vec [shape=cylinder, label="pgvector\\nOptional semantic retrieval"];
+  redis [shape=cylinder, label="Redis\\nOptional coordination/cache"];
+  obs [label="Logs • Metrics • Traces"];
+  candidate -> ui -> api;
+  api -> db;
+  api -> orch;
+  orch -> ctx;
+  ctx -> db;
+  ctx -> vec;
+  orch -> llm -> orch;
+  orch -> eval -> db;
+  orch -> db [label="checkpoint + session state"];
+  api -> redis [style=dashed, label="optional"];
+  orch -> obs;
+  api -> obs;
+}

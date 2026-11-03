@@ -1,0 +1,9 @@
+flowchart TD
+    Raw["LLM-proposed expression"] --> Validate["Schema validation"]
+    Validate --> Persona["Persona constraints"]
+    Persona --> Policy["Application policy + user preferences"]
+    Policy --> Resolve["Conflict resolution"]
+    Resolve --> Normalize["Range normalization"]
+    Normalize --> Capabilities["Provider capability lookup"]
+    Capabilities --> Map["Map / approximate / reject"]
+    Map --> Plan["Resolved expression + mapping report"]

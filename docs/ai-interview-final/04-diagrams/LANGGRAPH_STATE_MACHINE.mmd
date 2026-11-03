@@ -1,0 +1,18 @@
+stateDiagram-v2
+  [*] --> CREATED
+  CREATED --> PREPARING: start
+  PREPARING --> AWAITING_ANSWER: plan and first question committed
+  AWAITING_ANSWER --> PROCESSING_ANSWER: finalized answer accepted
+  PROCESSING_ANSWER --> AWAITING_ANSWER: follow-up or next question committed
+  PROCESSING_ANSWER --> FINALIZING: completion policy reached
+  AWAITING_ANSWER --> PAUSED: pause
+  PAUSED --> AWAITING_ANSWER: resume and reconcile
+  FINALIZING --> COMPLETED: report committed
+  PREPARING --> FAILED: unrecoverable failure
+  PROCESSING_ANSWER --> FAILED: unrecoverable failure
+  FAILED --> PREPARING: explicit recovery if safe
+  CREATED --> ABANDONED
+  AWAITING_ANSWER --> ABANDONED
+  PAUSED --> ABANDONED
+  COMPLETED --> [*]
+  ABANDONED --> [*]

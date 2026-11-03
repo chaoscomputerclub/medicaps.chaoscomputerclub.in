@@ -118,7 +118,7 @@ def test_extract_access_token_priority():
     req3 = Request(scope3)
     assert extract_access_token(req3, bearer_token="header-jwt-token") == "header-jwt-token"
 
-    # 4. Fallback to query param
+    # 4. Query param token is strictly rejected for standard endpoints (SEC-02)
     scope4 = {
         "type": "http",
         "method": "GET",
@@ -127,7 +127,7 @@ def test_extract_access_token_priority():
         "query_string": b"token=query-jwt-token",
     }
     req4 = Request(scope4)
-    assert extract_access_token(req4) == "query-jwt-token"
+    assert extract_access_token(req4) is None
 
 
 @pytest.mark.asyncio

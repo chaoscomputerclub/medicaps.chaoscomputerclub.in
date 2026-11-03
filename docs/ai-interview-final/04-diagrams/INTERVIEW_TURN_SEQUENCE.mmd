@@ -1,0 +1,20 @@
+sequenceDiagram
+  participant C as Candidate
+  participant UI as React UI
+  participant API as FastAPI
+  participant DB as PostgreSQL
+  participant G as LangGraph
+  participant L as LLM Provider
+  C->>UI: Submit finalized answer
+  UI->>API: POST answer + Idempotency-Key
+  API->>DB: Verify owner/state/question
+  API->>DB: Claim turn lease + persist answer
+  DB-->>API: Durable answer receipt
+  API->>G: Resume graph with server thread ID
+  G->>DB: Load finalized answer/context
+  G->>L: Structured evaluation request
+  L-->>G: Typed evaluation
+  G->>DB: Commit evaluation + next state/question
+  DB-->>API: Committed turn result
+  API-->>UI: Authoritative session state
+  UI-->>C: Show next question/report

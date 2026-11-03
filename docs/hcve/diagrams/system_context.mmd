@@ -1,0 +1,17 @@
+flowchart TB
+    User["End User"] --> Client["Web / Mobile Client"]
+    Client <-->|"Real-time audio + control"| Runtime["HCVE Runtime"]
+    Runtime --> Perception["Perception Engine"]
+    Runtime --> Turns["Turn Management"]
+    Perception --> Dialogue["Conversation Engine"]
+    Dialogue <--> Memory["Memory Engine"]
+    Dialogue <--> LLM["LLM Adapter"]
+    Dialogue --> Expression["Voice Expression Engine"]
+    Expression --> Rendering["Speech Rendering Engine"]
+    Rendering --> Runtime
+    Runtime --> Client
+    Ops["Observability / Evaluation"] -.-> Runtime
+    Ops -.-> Perception
+    Ops -.-> Dialogue
+    Ops -.-> Expression
+    Ops -.-> Rendering

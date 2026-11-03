@@ -1,0 +1,38 @@
+{
+  "package": "CCC AI Interview Practice \u2014 Final Repository-Specific Implementation Documentation",
+  "version": "FINAL",
+  "repository_archive": "medicaps-code.zip",
+  "documents": [
+    "01-audit/REPOSITORY_AUDIT.md",
+    "02-specifications/CHANGE_SPECIFICATION.md",
+    "02-specifications/END_TO_END_TARGET.md",
+    "03-contracts/API_CONTRACTS.md",
+    "03-contracts/DATA_AND_MIGRATION_SPEC.md",
+    "03-contracts/EVALUATION_AND_REPORTING.md",
+    "03-contracts/FRONTEND_UX_AND_STATE_CONTRACT.md",
+    "03-contracts/LANGGRAPH_RUNTIME_CONTRACT.md",
+    "03-contracts/LLM_PROVIDER_POLICY.md",
+    "03-contracts/RESUME_INTELLIGENCE_CONTRACT.md",
+    "03-contracts/SECURITY_PRIVACY_CONTRACT.md",
+    "03-contracts/VOICE_INTEGRATION_CONTRACT.md",
+    "04-diagrams/IMPLEMENTATION_DEPENDENCIES.mmd",
+    "04-diagrams/INTERVIEW_TURN_SEQUENCE.mmd",
+    "04-diagrams/LANGGRAPH_STATE_MACHINE.mmd",
+    "04-diagrams/RESUME_PIPELINE.mmd",
+    "04-diagrams/SYSTEM_CONTEXT.mmd",
+    "04-diagrams/VOICE_PIPELINE.mmd",
+    "05-backlog/IMPLEMENTATION_BACKLOG.md",
+    "05-backlog/TEST_MATRIX.md",
+    "06-operations/DECISIONS_AND_OPEN_VALIDATIONS.md",
+    "06-operations/RELEASE_AND_OPERATIONS.md",
+    "README.md"
+  ],
+  "scope": "Implementation specification and change plan; not implementation code",
+  "critical_findings": [
+    "LangGraph currently uses MemorySaver; replace with persistent checkpointing",
+    "LLM provider factory silently falls back to deterministic mock; forbid in production",
+    "HCVE session owner is caller-supplied/anonymous fallback; bind to authenticated interview owner",
+    "Candidate context currently includes PRN; remove direct identifiers from prompts",
+    "Explicit migration, resume review/consent, idempotency concurrency, and full voice integration need hardening"
+  ]
+}

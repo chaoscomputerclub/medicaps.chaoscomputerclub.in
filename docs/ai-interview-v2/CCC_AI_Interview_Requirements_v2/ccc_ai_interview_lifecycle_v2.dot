@@ -1,0 +1,20 @@
+
+digraph G {
+  graph [rankdir=LR, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.48", labelloc="t", label="Interview Session Lifecycle", fontsize=18, fontname="Arial"];
+  node [shape=box, style="rounded,filled", fillcolor="#f7f8fa", color="#586174", fontname="Arial", fontsize=10, margin="0.14,0.09"];
+  edge [color="#586174", arrowsize=0.7, fontname="Arial", fontsize=9];
+  Draft -> Ready [label="validate config"];
+  Ready -> InProgress [label="start"];
+  InProgress -> AwaitingAnswer [label="question committed"];
+  AwaitingAnswer -> ProcessingAnswer [label="answer submitted"];
+  ProcessingAnswer -> InProgress [label="follow-up / next question"];
+  ProcessingAnswer -> Paused [label="recoverable interruption"];
+  Paused -> InProgress [label="resume + validate checkpoint"];
+  InProgress -> Finalizing [label="end / turn limit"];
+  Finalizing -> Completed [label="report committed"];
+  ProcessingAnswer -> Failed [label="unrecoverable error"];
+  Failed -> InProgress [label="safe recovery"];
+  Draft -> Abandoned;
+  Ready -> Abandoned;
+  InProgress -> Abandoned;
+}

@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.responses import JSONResponse, PlainTextResponse, Response
 from app.core.config import settings
 from app.core.origins import get_allowed_production_origins, validate_frontend_origin
 from app.core.db import AsyncSessionLocal, init_db
@@ -24,7 +24,7 @@ from app.services.seed_service import seed_database
 from app.services.background_tasks_service import start_background_tasks
 from app.services.event_broadcaster import start_redis_event_relay
 from app.core.queue import queue_manager
-from app.routers import admin, admin_contests, admin_loadtest, admin_problems, admin_qa, assessment, auth, contests, events, fabric, feed, jobs, leaderboard, metrics, nodes, passes, practice, scoreboards, social, storage, verify, webhooks, workers
+from app.routers import admin, admin_contests, admin_loadtest, admin_problems, admin_qa, admin_interview, assessment, auth, contests, events, fabric, feed, interview, jobs, leaderboard, metrics, nodes, passes, practice, scoreboards, social, storage, verify, webhooks, workers
 from app.api.v1.router import api_router_v1
 from app.core.resource_governor import get_resource_governor
 
@@ -49,14 +49,44 @@ async def lifespan(app: FastAPI):
     await init_db()
     print("✓ Database verified & initialized successfully (clean state).")
 
-    # ── Production async queue workers ──────────────────────────────────────
-    queue_tasks = queue_manager.start_all()
-    print(f"✓ Async queue workers started: {list(queue_manager.workers.keys())}")
+    process_role = getattr(settings, "PROCESS_ROLE", "combined")
+    should_run_workers = process_role in ("combined", "worker")
 
-    # ── Production background tasks ──────────────────────────────────────────
-    bg_tasks = start_background_tasks(AsyncSessionLocal)
-    realtime_relay_task = start_redis_event_relay()
-    print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
+    queue_tasks = []
+    bg_tasks = []
+    realtime_relay_task = None
+    governor = None
+    autoscaler = None
+    reconciliation_worker = None
+
+    if should_run_workers:
+        # ── Production async queue workers ──────────────────────────────────────
+        queue_tasks = queue_manager.start_all()
+        print(f"✓ Async queue workers started: {list(queue_manager.workers.keys())}")
+
+        # ── Production background tasks ──────────────────────────────────────────
+        bg_tasks = start_background_tasks(AsyncSessionLocal)
+        realtime_relay_task = start_redis_event_relay()
+        print(f"✓ Background tasks started: {[t.get_name() for t in bg_tasks]}")
+
+        # ── Resource Governor (worker health sweep + autoscale signal loop) ─────
+        governor = get_resource_governor()
+        governor.start()
+        print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
+
+        # ── Dynamic Autoscaler & Capacity Watcher ──────────────────────────────
+        from app.core.autoscaler import Autoscaler
+        autoscaler = Autoscaler.get_instance()
+        autoscaler.start()
+        print("✓ Dynamic Autoscaler started (interval=10s)")
+
+        # ── Judge Reconciliation Worker (stuck processing audit & lease recovery) ─
+        from app.core.reconciliation import ReconciliationWorker
+        reconciliation_worker = ReconciliationWorker.get_instance()
+        await reconciliation_worker.start()
+        print("✓ Judge Reconciliation Worker started (interval=15s)")
+    else:
+        print(f"✓ Running in '{process_role}' role: background workers delegated to worker tier.")
 
     # ── Prewarm Core Docker Engine sandboxes (only when docker is active) ──────
     judge_choice = os.getenv("JUDGE_PROVIDER", "codebox").strip().lower()
@@ -70,35 +100,29 @@ async def lifespan(app: FastAPI):
     else:
         print(f"✓ Judge engine provider '{judge_choice}' active.")
 
-    # ── Resource Governor (worker health sweep + autoscale signal loop) ─────
-    governor = get_resource_governor()
-    governor.start()
-    print("✓ ResourceGovernor started (health-sweep=30s, autoscale=10s)")
-
-    # ── Dynamic Autoscaler & Capacity Watcher ──────────────────────────────
-    from app.core.autoscaler import Autoscaler
-    autoscaler = Autoscaler.get_instance()
-    autoscaler.start()
-    print("✓ Dynamic Autoscaler started (interval=10s)")
-
-    # ── Judge Reconciliation Worker (stuck processing audit & lease recovery) ─
-    from app.core.reconciliation import ReconciliationWorker
-    reconciliation_worker = ReconciliationWorker.get_instance()
-    await reconciliation_worker.start()
-    print("✓ Judge Reconciliation Worker started (interval=15s)")
-
     yield
 
     # ── Clean shutdown ────────────────────────────────────────────────────────
-    await reconciliation_worker.stop()
-    await autoscaler.stop()
-    await governor.stop()
-    await queue_manager.stop_all(drain_timeout=15.0)
-    for task in [*bg_tasks, realtime_relay_task]:
+    if reconciliation_worker:
+        await reconciliation_worker.stop()
+    if autoscaler:
+        await autoscaler.stop()
+    if governor:
+        await governor.stop()
+    if queue_tasks:
+        await queue_manager.stop_all(drain_timeout=15.0)
+    
+    tasks_to_cancel = [*bg_tasks]
+    if realtime_relay_task:
+        tasks_to_cancel.append(realtime_relay_task)
+    for task in tasks_to_cancel:
         task.cancel()
-    await asyncio.gather(*bg_tasks, realtime_relay_task, return_exceptions=True)
+    if tasks_to_cancel:
+        await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
     print(f"🛑 Shutting down {settings.PROJECT_NAME}...")
 
+
+docs_enabled = (not settings.is_production) or getattr(settings, "ENABLE_API_DOCS", False)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -107,8 +131,9 @@ app = FastAPI(
                 "Provides offline contest management, LeetCode/CodeChef telemetry, "
                 "division rating ladders, and cryptographic Trust-of-Proof verification.",
     lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/docs" if docs_enabled else None,
+    redoc_url="/redoc" if docs_enabled else None,
+    openapi_url="/openapi.json" if docs_enabled else None,
 )
 
 # End-to-End Distributed Trace ID Middleware (Generates/propagates X-Request-ID)
@@ -145,7 +170,11 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logging.getLogger("uvicorn.error").exception(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    import uuid
+    trace_id = getattr(request.state, "trace_id", None) or request.headers.get("x-request-id") or str(uuid.uuid4())
+    logging.getLogger("uvicorn.error").exception(
+        f"Unhandled error on {request.method} {request.url.path} [request_id={trace_id}]: {exc}"
+    )
     origin = request.headers.get("origin")
     valid_origin = validate_frontend_origin(origin)
 
@@ -158,7 +187,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal Server Error", "error": str(exc)},
+        content={"detail": "Internal Server Error", "request_id": trace_id},
         headers=headers,
     )
 
@@ -172,17 +201,72 @@ async def strix_verify():
     return "strix-verify-14cbf970e04612b8f26f423d9d0167d8"
 
 
+# ── Liveness Probe (Instant 200 OK, dependency-free) ─────────────────────────
+@app.get("/health/live", tags=["System"])
+async def liveness_probe():
+    """Kubernetes / Docker liveness probe: returns 200 immediately if process event-loop is alive."""
+    return {"status": "alive", "version": settings.VERSION}
+
+
+# ── Readiness Probe (Strict 200 vs 503 based on critical dependencies) ──────
+@app.get("/health/ready", tags=["System"])
+async def readiness_probe(response: Response):
+    """
+    Kubernetes / Docker readiness probe.
+    Returns 200 if database and Redis are reachable within 2s timeout.
+    Returns 503 Service Unavailable if critical dependencies are down.
+    """
+    from app.core.redis import ping_redis
+    from app.core.db import engine
+    from sqlalchemy import text
+
+    db_ok = False
+    redis_ok = False
+
+    try:
+        async with asyncio.timeout(2.0):
+            async with engine.connect() as conn:
+                res = await conn.execute(text("SELECT 1"))
+                db_ok = res.scalar() == 1
+    except Exception as e:
+        logging.getLogger("uvicorn.error").warning("Readiness DB probe failed: %s", e)
+
+    try:
+        async with asyncio.timeout(2.0):
+            redis_ok = await ping_redis()
+    except Exception as e:
+        logging.getLogger("uvicorn.error").warning("Readiness Redis probe failed: %s", e)
+
+    all_ready = db_ok and redis_ok
+    if not all_ready:
+        response.status_code = 503
+
+    return {
+        "status": "ready" if all_ready else "degraded",
+        "version": settings.VERSION,
+        "dependencies": {
+            "database": "ok" if db_ok else "unreachable",
+            "redis": "ok" if redis_ok else "unreachable",
+        },
+    }
+
+
 # ── Production Healthcheck ────────────────────────────────────────────────────
 @app.get("/api/health", tags=["System"])
-async def health_check():
+async def health_check(response: Response):
     """
-    Production readiness probe.
-    Returns 200 even if Redis/judge are degraded so the load-balancer stays up —
-    degraded status is surfaced in the response body for observability.
+    Production health probe.
+    Surfaces Redis, DB and judge status; flags 503 when primary dependencies are degraded.
     """
     from app.core.redis import ping_redis
 
-    redis_ok = await ping_redis()
+    redis_ok = False
+    try:
+        async with asyncio.timeout(2.0):
+            redis_ok = await ping_redis()
+    except Exception:
+        pass
+
     judge_provider = "unknown"
     judge_healthy = False
     judge_meta = {}
@@ -190,14 +274,19 @@ async def health_check():
         from app.engine.providers.factory import get_judge_provider
         provider = get_judge_provider()
         judge_provider = provider.name
-        judge_healthy = await provider.healthy()
+        async with asyncio.timeout(2.0):
+            judge_healthy = await provider.healthy()
         if hasattr(provider, "get_engine_status"):
             judge_meta = await provider.get_engine_status()
     except Exception:
         pass
 
+    is_operational = redis_ok
+    if not is_operational:
+        response.status_code = 503
+
     return {
-        "status": "operational",
+        "status": "operational" if is_operational else "degraded",
         "chapter": "Chaos Computer Club — Medi-Caps University",
         "environment": "air_gapped_offline_ready",
         "version": settings.VERSION,
@@ -230,6 +319,8 @@ app.include_router(fabric.router, prefix=settings.API_PREFIX)
 app.include_router(metrics.router, prefix=settings.API_PREFIX)
 app.include_router(metrics.router)  # Standard Prometheus root path GET /metrics
 app.include_router(practice.router, prefix=settings.API_PREFIX)
+app.include_router(interview.router, prefix=settings.API_PREFIX)
+app.include_router(interview.canonical_interview_router, prefix=settings.API_PREFIX)
 
 # OpenAPI 3.1.0 Webhooks specifications for Swagger / ReDoc docs UI
 app.webhooks.include_router(webhooks.webhooks_router)
@@ -238,9 +329,9 @@ app.webhooks.include_router(webhooks.webhooks_router)
 app.include_router(admin.router, prefix=settings.API_PREFIX)
 app.include_router(admin_contests.router, prefix=settings.API_PREFIX)
 app.include_router(admin_problems.router, prefix=settings.API_PREFIX)
-app.include_router(admin_problems.router)  # Direct /admin/problems mount
 app.include_router(admin_qa.router, prefix=settings.API_PREFIX)
 app.include_router(admin_loadtest.router, prefix=settings.API_PREFIX)
+app.include_router(admin_interview.router, prefix=settings.API_PREFIX)
 
 
 # Versioned surface — preferred for all new clients (/api/v1/).

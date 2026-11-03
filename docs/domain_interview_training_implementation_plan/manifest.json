@@ -1,0 +1,30 @@
+{
+  "title": "Domain Interview Training and Implementation Plan",
+  "version": "1.0.0",
+  "documents": [
+    "README.md",
+    "00_VISION_AND_ARCHITECTURE_DECISIONS.md",
+    "01_DATABASE_DRIVEN_DOMAIN_CATALOG.md",
+    "02_DOMAIN_CURRICULUM_AND_GRAPH_BLUEPRINT.md",
+    "03_PRETRAINING_AND_AGENT_PREPARATION.md",
+    "04_DATASET_CREATION_AND_QUALITY.md",
+    "05_JUDGE_AND_EVALUATION_FRAMEWORK.md",
+    "06_RUNTIME_INFERENCE_WITHOUT_CANDIDATE_KEYS.md",
+    "07_ADMIN_TRAINING_WORKFLOW.md",
+    "08_IMPLEMENTATION_ARCHITECTURE_AND_APIS.md",
+    "09_ML_TRAINING_AND_MLOPS_ROADMAP.md",
+    "10_SECURITY_PRIVACY_AND_GOVERNANCE.md",
+    "11_TEST_PLAN_AND_ACCEPTANCE.md",
+    "12_IMPLEMENTATION_BACKLOG.md",
+    "13_CODING_AGENT_EXECUTION_PROMPT.md",
+    "diagrams/DOMAIN_TRAINING_AND_RUNTIME.md"
+  ],
+  "principles": [
+    "Database-driven domains",
+    "Admin-authored immutable blueprints",
+    "Coding agent for offline authoring and QA",
+    "No candidate-provided API keys",
+    "Production inference requires an explicitly supported runtime",
+    "Fine-tuning is optional and evidence-gated"
+  ]
+}

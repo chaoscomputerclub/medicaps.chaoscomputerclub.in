@@ -1,0 +1,11 @@
+flowchart TD
+    A["Incoming Audio"] --> B["Audio Preprocessor"]
+    B --> C["Voice Activity Detection"]
+    B --> D["Audio Feature Extraction"]
+    C --> E["Speech Recognition"]
+    D --> F["Vocal Signal Analysis"]
+    E --> G["Transcript Normalizer"]
+    F --> H["Vocal Cue Estimator"]
+    G --> I["Perception Context"]
+    H --> I
+    I --> J["Conversation Engine"]

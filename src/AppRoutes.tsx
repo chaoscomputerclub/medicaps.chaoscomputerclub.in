@@ -249,6 +249,9 @@ export const ProblemArchivePage = lazyWithRetry(() => import("./pages/ProblemArc
 export const ProblemDetailPage = lazyWithRetry(() => import("./pages/ProblemDetailPage"), "ProblemDetailPage");
 export const PracticePage = lazyWithRetry(() => import("./pages/PracticePage"), "PracticePage");
 export const PracticeProblemPage = lazyWithRetry(() => import("./pages/PracticeProblemPage"), "PracticeProblemPage");
+export const InterviewDashboardPage = lazyWithRetry(() => import("./pages/InterviewDashboardPage"), "InterviewDashboardPage");
+export const InterviewWorkspacePage = lazyWithRetry(() => import("./pages/InterviewWorkspacePage"), "InterviewWorkspacePage");
+export const InterviewReportPage = lazyWithRetry(() => import("./pages/InterviewReportPage"), "InterviewReportPage");
 export const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
 export const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
 export const TermsPage = lazyWithRetry(() => import("./pages/TermsPage"), "TermsPage");
@@ -257,6 +260,7 @@ export const routePreloaders: Record<string, () => Promise<any>> = {
   "/": () => DashboardPage.preload(),
   "/contests": () => ContestsHubPage.preload(),
   "/practice": () => PracticePage.preload(),
+  "/interview": () => InterviewDashboardPage.preload(),
   "/my-contests": () => MyContestsPage.preload(),
   "/leaderboard": () => LeaderboardPage.preload(),
   "/problems": () => ProblemArchivePage.preload(),
@@ -542,6 +546,32 @@ export function AppRoutes() {
             element={
               <Suspense fallback={<AssessmentStudioSkeleton />}>
                 <PracticeProblemPage />
+              </Suspense>
+            }
+          />
+
+          {/* AI Technical Interview Simulation */}
+          <Route
+            path="interview"
+            element={
+              <Suspense fallback={<PracticeSkeleton />}>
+                <InterviewDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="interview/:sessionId"
+            element={
+              <Suspense fallback={<AssessmentStudioSkeleton />}>
+                <InterviewWorkspacePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="interview/:sessionId/report"
+            element={
+              <Suspense fallback={<ContestResultsSkeleton />}>
+                <InterviewReportPage />
               </Suspense>
             }
           />

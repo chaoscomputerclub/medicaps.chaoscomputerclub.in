@@ -9,6 +9,7 @@ import {
   BarChart2,
   Settings,
   Terminal,
+  Sparkles,
   LogOut,
   Menu,
   X,
@@ -31,6 +32,7 @@ import {
   MyContestsSkeleton,
   ProblemArchiveSkeleton,
   ProblemDetailSkeleton,
+  PracticeSkeleton,
   ProfileSkeleton,
   SettingsSkeleton,
   DashboardSkeleton,
@@ -41,6 +43,7 @@ const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/contests", label: "Contests", icon: Trophy, exact: false },
   { to: "/practice", label: "Practice", icon: Terminal, exact: false },
+  { to: "/interview", label: "AI Interview", icon: Sparkles, exact: false },
   { to: "/leaderboard", label: "Leaderboard", icon: BarChart2, exact: true },
   { to: "/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
@@ -87,6 +90,9 @@ function PortalRouteSkeleton() {
   }
   if (cleanPath.startsWith("/practice/")) {
     return <AssessmentStudioSkeleton />;
+  }
+  if (cleanPath.startsWith("/interview")) {
+    return <PracticeSkeleton />;
   }
   if (cleanPath.startsWith("/settings")) {
     return <SettingsSkeleton />;

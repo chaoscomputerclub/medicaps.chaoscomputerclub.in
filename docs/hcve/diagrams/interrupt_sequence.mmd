@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant C as Client
+    participant R as Runtime
+    participant V as VAD
+    participant T as Turn Manager
+    participant X as Cancellation Coordinator
+    participant L as LLM
+    participant S as TTS
+    U->>C: Speaks during assistant playback
+    C->>R: Microphone frames
+    R->>V: Audio frames
+    V-->>T: Speech-start candidate
+    T->>T: Confirm barge-in policy
+    T->>X: Cancel response_id
+    X->>L: Cancel generation
+    X->>S: Cancel synthesis
+    X->>R: Stop accepting response chunks
+    R-->>C: response.cancelled
+    C->>C: Discard late chunks for cancelled response
+    R->>V: Continue forwarding user audio
+    V-->>T: Utterance finalized
+    T->>L: New user turn can proceed
