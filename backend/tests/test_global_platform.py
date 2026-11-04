@@ -12,7 +12,7 @@ Tests for:
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import select
+from sqlalchemy import select, delete
 
 from main import app
 from app.core.config import settings
@@ -21,6 +21,7 @@ from app.core.security import create_access_token
 from app.models.db_models import (
     MemberProfile,
     OfflineContest,
+    ContestRegistration,
     Organization,
     OrganizationDomain,
     OrganizationMembership,
@@ -180,7 +181,13 @@ async def test_policies_list_and_detail(async_client: AsyncClient):
 async def test_user_consent_recording(async_client: AsyncClient, setup_test_cadets):
     """Verify user can accept policy and audit consent is recorded."""
     open_user = setup_test_cadets["open_user"]
-    token = create_access_token(open_user.id)
+
+    async with AsyncSessionLocal() as db:
+        await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id == open_user.id))
+        await db.execute(delete(UserConsent).where(UserConsent.member_id == open_user.id, UserConsent.policy_type == "CONTEST_RULES"))
+        await db.commit()
+
+    token = create_access_token({"sub": open_user.id, "email": open_user.email, "handle": open_user.handle})
     headers = {"Authorization": f"Bearer {token}"}
 
     # Accept Terms of Service
@@ -190,7 +197,7 @@ async def test_user_consent_recording(async_client: AsyncClient, setup_test_cade
         headers=headers,
     )
     assert accept_resp.status_code == 200
-    assert accept_resp.json()["status"] == "recorded"
+    assert accept_resp.json()["policy_type"] == "TERMS_OF_SERVICE"
 
     # Query personal consent ledger
     me_resp = await async_client.get("/api/policies/me/consents", headers=headers)
@@ -210,24 +217,37 @@ async def test_contest_rules_version_acceptance(async_client: AsyncClient, setup
         res = await db.execute(stmt)
         c = res.scalar_one_or_none()
         if not c:
+            now = now_utc()
             c = OfflineContest(
                 id="c-test-global-rules",
                 slug="test-global-rules-contest",
                 title="Global Rules Test Contest",
-                description="Test contest for rules acceptance",
+                summary="Test contest for rules acceptance",
+                season="2026",
                 status="upcoming",
-                visibility="public",
-                rules_version="1.0.0",
+                division="open",
+                venue="Online Arena",
+                environment="Air-gapped Linux",
                 seat_capacity=50,
                 registered_count=0,
-                start_time=now_utc(),
-                end_time=now_utc(),
+                problem_count=4,
+                starts_at=now,
+                ends_at=now,
+                check_in_opens_at=now,
+                visibility="public",
+                rules_version="1.0.0",
             )
             db.add(c)
             await db.commit()
 
     open_user = setup_test_cadets["open_user"]
-    token = create_access_token(open_user.id)
+
+    async with AsyncSessionLocal() as db:
+        await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id == open_user.id))
+        await db.execute(delete(UserConsent).where(UserConsent.member_id == open_user.id, UserConsent.policy_type == "CONTEST_RULES"))
+        await db.commit()
+
+    token = create_access_token({"sub": open_user.id, "email": open_user.email, "handle": open_user.handle})
     headers = {"Authorization": f"Bearer {token}"}
 
     # 1. Mismatched rules version fails with 400
@@ -267,26 +287,39 @@ async def test_organization_private_contest_gate(async_client: AsyncClient, setu
         res = await db.execute(stmt)
         c = res.scalar_one_or_none()
         if not c:
+            now = now_utc()
             c = OfflineContest(
                 id="c-test-medicaps-private",
                 slug="test-medicaps-private-contest",
                 title="Medi-Caps Private Contest",
-                description="Private campus contest",
+                summary="Private campus contest",
+                season="2026",
                 status="upcoming",
+                division="open",
+                venue="Online Arena",
+                environment="Air-gapped Linux",
+                seat_capacity=50,
+                registered_count=0,
+                problem_count=4,
+                starts_at=now,
+                ends_at=now,
+                check_in_opens_at=now,
                 visibility="organization_private",
                 organization_id="org-medicaps-university-default",
                 rules_version="1.0.0",
-                seat_capacity=50,
-                registered_count=0,
-                start_time=now_utc(),
-                end_time=now_utc(),
             )
             db.add(c)
             await db.commit()
 
     # Open user (gmail) is not in medicaps organization -> 403 Forbidden
     open_user = setup_test_cadets["open_user"]
-    token = create_access_token(open_user.id)
+
+    async with AsyncSessionLocal() as db:
+        await db.execute(delete(ContestRegistration).where(ContestRegistration.member_id == open_user.id))
+        await db.execute(delete(UserConsent).where(UserConsent.member_id == open_user.id, UserConsent.policy_type == "CONTEST_RULES"))
+        await db.commit()
+
+    token = create_access_token({"sub": open_user.id, "email": open_user.email, "handle": open_user.handle})
     headers = {"Authorization": f"Bearer {token}"}
 
     resp = await async_client.post(
@@ -306,8 +339,8 @@ async def test_admin_settings_rbac_and_audit(async_client: AsyncClient, setup_te
     open_user = setup_test_cadets["open_user"]
     admin_user = setup_test_cadets["admin_user"]
 
-    open_token = create_access_token(open_user.id)
-    admin_token = create_access_token(admin_user.id)
+    open_token = create_access_token({"sub": open_user.id, "email": open_user.email, "handle": open_user.handle})
+    admin_token = create_access_token({"sub": admin_user.id, "email": admin_user.email, "handle": admin_user.handle})
 
     # 1. Non-admin gets 403
     resp_forbidden = await async_client.get(
@@ -323,22 +356,22 @@ async def test_admin_settings_rbac_and_audit(async_client: AsyncClient, setup_te
     )
     assert resp_admin.status_code == 200
     settings_dict = resp_admin.json()
-    assert "PLATFORM_IDENTITY" in settings_dict
+    assert "platform.name" in settings_dict
 
     # 3. Admin updates setting -> audit recorded
     update_resp = await async_client.put(
-        "/api/admin/settings/PLATFORM_IDENTITY",
-        json={"value_json": {"platform_name": "Chaos Computer Club Arena", "brand_mode": "GLOBAL"}},
+        "/api/admin/settings/platform.name",
+        json={"value_json": {"value": "Chaos Computer Club Arena", "brand_mode": "GLOBAL"}},
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert update_resp.status_code == 200
 
     # 4. Check audit log
     audit_resp = await async_client.get(
-        "/api/admin/settings/audit?key=PLATFORM_IDENTITY",
+        "/api/admin/settings/audit?key=platform.name",
         headers={"Authorization": f"Bearer {admin_token}"},
     )
     assert audit_resp.status_code == 200
     audits = audit_resp.json()
     assert len(audits) >= 1
-    assert audits[0]["setting_key"] == "PLATFORM_IDENTITY"
+    assert audits[0]["setting_key"] == "platform.name"

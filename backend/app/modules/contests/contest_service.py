@@ -707,7 +707,7 @@ class ContestService:
 
         # Check organization private visibility
         if getattr(contest, "visibility", "public") == "organization_private" and getattr(contest, "organization_id", None):
-            is_admin_or_core = getattr(current_member, "platform_role", None) in ("PLATFORM_ADMIN", "SECURITY_ADMIN") or current_member.role in ("ADMIN", "CORE")
+            is_admin_or_core = getattr(current_member, "platform_role", None) in ("PLATFORM_ADMIN", "SECURITY_ADMIN") or getattr(current_member, "is_core_member", False)
             if not is_admin_or_core:
                 from app.models.organization import OrganizationMembership
                 mem_stmt = select(OrganizationMembership).where(
@@ -787,7 +787,6 @@ class ContestService:
                     source="CONTEST_REGISTRATION",
                     ip_address=client_ip,
                     user_agent=user_agent,
-                    metadata={"contest_id": contest.id, "contest_slug": contest.slug},
                     db=db,
                 )
             except Exception as e:
