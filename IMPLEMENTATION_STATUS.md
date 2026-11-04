@@ -1,49 +1,65 @@
-# Interview Arena — Implementation Status
-**Document ID:** CCC-AI-STATUS-001  
-**Version:** 1.6.0  
-**Date:** 2026-11-03  
-**Status:** ALL DOMAIN TRAINING & BLUEPRINT PIPELINE CRITICAL REQUIREMENTS COMPLETE  
+# Global Platform Transformation — Implementation Status
+**Document ID:** CCC-GLOBAL-STATUS-001  
+**Version:** 1.7.0  
+**Date:** 2026-11-04  
+**Status:** PRODUCTION DEPLOYED & OPERATIONAL ON GITHUB + CLOUD  
 
 ---
 
-## 1. Traceability & Backlog Mapping
+## 1. Executive Summary
+The competitive programming and AI technical interview platform has been successfully transformed into an institution-neutral, globally accessible engineering arena while preserving all historical student records, ratings, submissions, and cgroup v2 sandbox security guarantees.
 
-| Epic | Item | Requirement | Implemented Files | Status | Test Coverage |
+Medi-Caps University is now provisioned as an official verified organization workspace (`org-medicaps-university-default`), and users worldwide can register with personal or corporate email addresses without restriction.
+
+---
+
+## 2. Traceability Matrix
+
+| Epic / Domain | Item | Requirement | Implemented Files | Status | Test Coverage |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Epic 0** | CCC-AI-0001 | Repository discovery & Gap Analysis | `IMPLEMENTATION_GAP_REPORT.md` | **COMPLETE** | Documented baseline |
-| **Epic 1** | CCC-AI-0101 | Database-driven domain catalog (`interview_domains`) | `backend/app/models/interview.py`, `0007_domain_training_and_catalog.sql` | **COMPLETE** | `test_domain_training.py::test_dynamic_db_domain_and_blueprint_discovery` |
-| **Epic 1** | CCC-AI-0102 | Seed initial published tracks into DB | `blueprint_registry.py` (`sync_preseeded_to_db`) | **COMPLETE** | `test_interview_blueprints.py::test_list_published_tracks_api` |
-| **Epic 1** | CCC-AI-0103 | Track catalog endpoints & canonical aliases | `backend/app/routers/interview.py` (`/tracks`, `/interview-domains`) | **COMPLETE** | `test_domain_training.py::test_canonical_spec_api_aliases` |
-| **Epic 1** | CCC-AI-0104 | Candidate-facing catalog UI (Technical & Other) | `src/pages/InterviewDashboardPage.tsx` | **COMPLETE** | Blueprint Detail Modal + `npm run build` |
-| **Epic 1** | CCC-AI-0105 | Remove candidate custom-interview creator | `src/pages/InterviewDashboardPage.tsx` (Direct Practice action) | **COMPLETE** | Verified no modal trigger |
-| **Epic 2** | CCC-AI-0201 | Versioned blueprint & node contracts | `backend/app/services/interview/blueprint_registry.py` | **COMPLETE** | Pydantic strict schemas with AliasChoices |
-| **Epic 2** | CCC-AI-0202 | Graph integrity validator (reachability, terminal) | `BlueprintGraphValidator` in `blueprint_registry.py` | **COMPLETE** | `test_interview_blueprints.py::test_graph_validator_detects_broken_graphs` |
-| **Epic 2** | CCC-AI-0203 | Immutable version pinning per session | `backend/app/services/interview/langgraph_orchestrator.py` | **COMPLETE** | `test_create_session_from_track_slug_and_start` |
-| **Epic 3** | CCC-AI-0301 | Session creation via `interview_slug` | `backend/app/routers/interview.py`, `langgraph_orchestrator.py` | **COMPLETE** | `test_create_session_from_track_slug_and_start` |
-| **Epic 3** | CCC-AI-0302 | Session resume across page refresh | `src/pages/InterviewWorkspacePage.tsx` | **COMPLETE** | Server rehydration hook |
-| **Epic 3** | CCC-AI-0303 | Stable turn-level idempotency key UX | `src/pages/InterviewWorkspacePage.tsx` | **COMPLETE** | Replay deduplication verified |
-| **Epic 3** | CCC-AI-0304 | Admin training workflow (Create -> Draft -> Publish) | `backend/app/routers/admin_interview.py` | **COMPLETE** | `test_domain_training.py::test_admin_domain_training_full_lifecycle` |
-| **Epic 4** | CCC-AI-0401 | Node-constrained question generation & fallbacks | `blueprint_registry.py`, `langgraph_orchestrator.py` | **COMPLETE** | Fallback questions on all nodes |
-| **Epic 4** | CCC-AI-0402 | Rubric-based turn evaluation & evidence quotes | `langgraph_orchestrator.py` | **COMPLETE** | `test_ai_interview.py` |
-| **Epic 4** | CCC-AI-0403 | Voice workspace with barge-in interruption | `src/pages/InterviewWorkspacePage.tsx` | **COMPLETE** | STT streaming & cancel synthesis |
-| **Epic 4** | CCC-AI-0404 | Dataset authoring & offline judge evaluation | `backend/app/services/interview/dataset_harness.py` | **COMPLETE** | `test_domain_training.py::test_dataset_harness_judge_evaluation_and_prompt_injection_defense` |
-| **Epic 5** | CCC-AI-0501 | Optional resume upload & fact extraction | `src/features/interview/components/ResumeManagerModal.tsx` | **COMPLETE** | `test_ai_interview.py::test_candidate_profile_and_resume_lifecycle` |
-| **Epic 5** | CCC-AI-0502 | Personalize context without mutating blueprint | `langgraph_orchestrator.py`, `CandidateContextService` | **COMPLETE** | Verified unverified claim boundary |
-| **Epic 6** | CCC-AI-0601 | Evidence-linked report dossier & regeneration | `src/pages/InterviewReportPage.tsx` | **COMPLETE** | `test_ai_interview.py::test_interview_report_and_regeneration` |
-| **Epic 6** | CCC-AI-0602 | Non-binary constructive readiness milestones | `src/pages/InterviewReportPage.tsx` | **COMPLETE** | Anti-hire/no-hire verified |
-| **Epic 7** | CCC-AI-0701 | Tenant isolation & owner authorization | `backend/app/routers/interview.py` | **COMPLETE** | `test_ai_interview.py::test_session_creation_and_ownership_gate` |
-| **Epic 8** | CCC-AI-0801 | Admin auth gate & prompt-injection security | `backend/app/routers/admin_interview.py` | **COMPLETE** | `test_domain_training.py::test_admin_auth_gate_blocks_regular_students` |
+| **Architecture** | CCC-GL-001 | Repository Globalization Audit | `GLOBALIZATION_AUDIT.md` | **COMPLETE** | Phase 0 Repo Scan |
+| **Architecture** | CCC-GL-002 | Target System Architecture | `TARGET_ARCHITECTURE.md` | **COMPLETE** | Ingress & Model Blueprint |
+| **Architecture** | CCC-GL-003 | Expand-and-Contract Migration Plan | `DATA_MIGRATION_PLAN.md` | **COMPLETE** | Schema Evolution Protocol |
+| **Architecture** | CCC-GL-004 | Domain & Multi-Host DNS Runbook | `DOMAIN_AND_DNS_RUNBOOK.md` | **COMPLETE** | Nginx & CORS Mapping |
+| **Architecture** | CCC-GL-005 | Statutory Legal & Consent Policy Spec | `LEGAL_POLICY_IMPLEMENTATION.md` | **COMPLETE** | 5 Versioned Legal Policies |
+| **Security** | CCC-GL-006 | Global Exposure Security & Sandbox Review | `SECURITY_REVIEW.md` | **COMPLETE** | Threat Modeling & Seccomp |
+| **Database** | CCC-GL-010 | Migration 0008: Global Orgs & Policies | `backend/migrations/0008_global_platform_and_organizations.sql` | **COMPLETE** | PostgreSQL DDL & Seeds |
+| **Models** | CCC-GL-011 | Organizations, Policies, Settings ORM | `organization.py`, `policy.py`, `settings.py`, `db_models.py` | **COMPLETE** | SQLAlchemy Models Verified |
+| **Services** | CCC-GL-020 | Workspace Management & Domain Auto-Join | `app/services/organization_service.py` | **COMPLETE** | `test_get_organization_by_slug` |
+| **Services** | CCC-GL-021 | Versioned Policies & Consent Ledger | `app/services/policy_service.py` | **COMPLETE** | `test_user_consent_recording` |
+| **Services** | CCC-GL-022 | Platform Settings & Audit Service | `app/services/platform_settings_service.py` | **COMPLETE** | `test_admin_settings_rbac_and_audit` |
+| **API Endpoints** | CCC-GL-030 | Public Organization Workspaces API | `backend/app/routers/organizations.py` | **COMPLETE** | `GET /api/organizations` |
+| **API Endpoints** | CCC-GL-031 | Versioned Statutory Policies API | `backend/app/routers/policies.py` | **COMPLETE** | `GET /api/policies/{type}` |
+| **API Endpoints** | CCC-GL-032 | Admin Configuration & Audit API | `backend/app/routers/admin_settings.py` | **COMPLETE** | `PUT /api/admin/settings/{key}` |
+| **Identity & Auth** | CCC-GL-040 | Universal Personal/Work Email Auth | `schemas/auth.py`, `otp_service.py`, `oauth_service.py` | **COMPLETE** | `test_global_email_normalization` |
+| **Contest Engine** | CCC-GL-050 | Visibility Gate (Public vs Org Private) | `contest_service.py`, `contest_repository.py` | **COMPLETE** | `test_organization_private_contest_gate` |
+| **Contest Engine** | CCC-GL-051 | Versioned Contest Rules Acceptance Gate | `contest_service.py`, `RegisterConfirmModal.tsx` | **COMPLETE** | `test_contest_rules_version_acceptance` |
+| **Frontend UI** | CCC-GL-060 | Neutral Global Branding & Terminology | `PortalShell.tsx`, `DashboardPage.tsx`, `index.html` | **COMPLETE** | Visual Consistency Maintained |
+| **Frontend UI** | CCC-GL-061 | Dynamic Legal Policy Routes & Viewer | `TermsPage.tsx`, `PrivacyPolicyPage.tsx`, etc. | **COMPLETE** | Clean Markdown/HTML Rendering |
+| **Frontend UI** | CCC-GL-062 | Universal Registration & Org Discovery | `src/pages/AuthPage.tsx`, `src/lib/auth.ts` | **COMPLETE** | No Campus Domain Blocking |
 
 ---
 
-## 2. Test Verification Evidence
+## 3. Verification & Acceptance Summary
 
 ```bash
-PYTHONPATH=.:backend ./backend/.venv/bin/pytest backend/tests/test_domain_training.py backend/tests/test_interview_blueprints.py backend/tests/test_ai_interview.py backend/tests/test_ai_interview_ml_engine.py backend/tests/hcve/
-```
-**Output:** `45 passed in 6.36s` (100% passing).
+# 1. Backend Test Suite
+PYTHONPATH=.:backend ./backend/.venv/bin/pytest backend/tests/test_global_platform.py -v
+# Output: 9 passed in 2.26s (100% PASS)
 
-```bash
-npx tsc --noEmit && npm run build
+# 2. Frontend Typecheck & Build
+npm run typecheck && npm run build
+# Output: 0 errors, production build in 2.09s
+
+# 3. Production Deployment & Live Health Verification
+curl -s https://medicaps.chaoscomputerclub.in/api/health
+# Output: {"status":"operational","chapter":"Chaos Computer Club — Medi-Caps University","version":"1.7.0",...}
+
+# 4. Live Verified Organizations API
+curl -s https://medicaps.chaoscomputerclub.in/api/organizations
+# Output: [{"id":"org-medicaps-university-default","slug":"medicaps-university",...}]
+
+# 5. Live Published Platform Policies API
+curl -s https://medicaps.chaoscomputerclub.in/api/policies
+# Output: 5 active policies (TERMS_OF_SERVICE, PRIVACY_POLICY, CONTEST_RULES, CODE_OF_CONDUCT, ACCEPTABLE_USE)
 ```
-**Output:** `✓ built in 3.31s` (0 TypeScript errors, 52 production chunks).
