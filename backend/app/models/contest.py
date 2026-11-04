@@ -48,11 +48,15 @@ class OfflineContest(Base):
     cadence = Column(String(20), default="weekly", nullable=False)  # weekly, biweekly, special
     edition = Column(Integer, nullable=True)  # e.g. 42, 18
     banner_url = Column(String(500), nullable=True)
+    visibility = Column(String(30), default="public", nullable=False, index=True)  # public, unlisted, organization_private, platform_admin_only
+    organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True, index=True)
+    rules_version = Column(String(20), default="1.0.0", nullable=False)
     version = Column(Integer, default=1, nullable=False)
     ratings_finalized_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
 
     # Relationships
+    organization = relationship("Organization", back_populates="contests")
     assessment = relationship("Assessment", back_populates="contest", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
     problems = relationship("ContestProblem", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
     scoreboard_entries = relationship("ScoreboardEntry", back_populates="contest", cascade="all, delete-orphan", passive_deletes=True)
@@ -193,6 +197,8 @@ class ContestRegistration(Base):
     campus_pass_code = Column(String(30), nullable=True)
     seat_assigned = Column(String(20), nullable=True)
     checked_in_at = Column(DateTime(timezone=True), nullable=True)
+    rules_version_accepted = Column(String(20), nullable=True)
+    rules_accepted_at = Column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (
         UniqueConstraint("contest_id", "member_id", name="uq_contest_member_reg"),

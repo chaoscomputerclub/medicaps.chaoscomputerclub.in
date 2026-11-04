@@ -51,6 +51,9 @@ class MemberProfile(Base):
     bio = Column(String(500), nullable=True)                                    # Student bio / tagline
     github_username = Column(String(100), nullable=True)                       # GitHub handle
     linkedin_url = Column(String(200), nullable=True)                          # LinkedIn profile / handle
+    locale = Column(String(10), default="en", nullable=False)
+    timezone = Column(String(50), default="UTC", nullable=False)
+    platform_role = Column(String(30), default="USER", nullable=False)         # USER, CORE_MEMBER, PLATFORM_ADMIN
     version = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime(timezone=True), default=now_utc, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=now_utc, onupdate=now_utc, nullable=True)
@@ -64,6 +67,8 @@ class MemberProfile(Base):
     assessment_sessions = relationship("AssessmentSession", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
     assessment_submissions = relationship("AssessmentSubmission", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
     trust_proofs = relationship("TrustProof", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    organization_memberships = relationship("OrganizationMembership", foreign_keys="OrganizationMembership.member_id", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
+    consents = relationship("UserConsent", back_populates="member", cascade="all, delete-orphan", passive_deletes=True)
 
     __table_args__ = (
         Index("ix_member_profiles_leaderboard_core", "is_onboarded", "rating", "peak_rating", "attendance_count", "id"),

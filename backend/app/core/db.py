@@ -687,6 +687,105 @@ async def ensure_database_integrity():
                 "CREATE INDEX IF NOT EXISTS ix_interview_blueprints_slug ON interview_blueprints(slug)",
                 "CREATE INDEX IF NOT EXISTS ix_interview_blueprint_versions_bp ON interview_blueprint_versions(blueprint_id)",
                 "CREATE INDEX IF NOT EXISTS ix_interview_domain_datasets_bp_ver ON interview_domain_datasets(blueprint_version_id)",
+                # ── Global Platform & Organizations (Migration 0008) ─────────────
+                """CREATE TABLE IF NOT EXISTS organizations (
+                    id VARCHAR(36) PRIMARY KEY,
+                    slug VARCHAR(60) NOT NULL UNIQUE,
+                    name VARCHAR(150) NOT NULL,
+                    description TEXT NOT NULL DEFAULT '',
+                    organization_type VARCHAR(30) NOT NULL DEFAULT 'COMMUNITY',
+                    logo_url VARCHAR(500),
+                    website VARCHAR(255),
+                    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )""",
+                """CREATE TABLE IF NOT EXISTS organization_domains (
+                    id VARCHAR(36) PRIMARY KEY,
+                    organization_id VARCHAR(36) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                    domain VARCHAR(100) NOT NULL UNIQUE,
+                    is_verified BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )""",
+                """CREATE TABLE IF NOT EXISTS organization_memberships (
+                    id VARCHAR(64) PRIMARY KEY,
+                    organization_id VARCHAR(36) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                    member_id VARCHAR(36) NOT NULL REFERENCES member_profiles(id) ON DELETE CASCADE,
+                    role VARCHAR(30) NOT NULL DEFAULT 'MEMBER',
+                    status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
+                    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    invited_by VARCHAR(36) REFERENCES member_profiles(id) ON DELETE SET NULL,
+                    CONSTRAINT uq_organization_member UNIQUE (organization_id, member_id)
+                )""",
+                """CREATE TABLE IF NOT EXISTS organization_invitations (
+                    id VARCHAR(36) PRIMARY KEY,
+                    organization_id VARCHAR(36) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+                    email VARCHAR(120) NOT NULL,
+                    role VARCHAR(30) NOT NULL DEFAULT 'MEMBER',
+                    token_hash VARCHAR(64) NOT NULL UNIQUE,
+                    expires_at TIMESTAMPTZ NOT NULL,
+                    accepted_at TIMESTAMPTZ,
+                    created_by VARCHAR(36) REFERENCES member_profiles(id) ON DELETE SET NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )""",
+                """CREATE TABLE IF NOT EXISTS platform_policies (
+                    id VARCHAR(36) PRIMARY KEY,
+                    policy_type VARCHAR(40) NOT NULL,
+                    version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
+                    locale VARCHAR(10) NOT NULL DEFAULT 'en',
+                    title VARCHAR(200) NOT NULL,
+                    content TEXT NOT NULL,
+                    change_summary TEXT NOT NULL DEFAULT 'Initial version',
+                    effective_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    is_published BOOLEAN NOT NULL DEFAULT TRUE,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    CONSTRAINT uq_policy_type_version_locale UNIQUE (policy_type, version, locale)
+                )""",
+                """CREATE TABLE IF NOT EXISTS user_consents (
+                    id VARCHAR(36) PRIMARY KEY,
+                    member_id VARCHAR(36) NOT NULL REFERENCES member_profiles(id) ON DELETE CASCADE,
+                    policy_id VARCHAR(36) REFERENCES platform_policies(id) ON DELETE SET NULL,
+                    policy_type VARCHAR(40) NOT NULL,
+                    version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
+                    accepted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    ip_address VARCHAR(45),
+                    user_agent VARCHAR(255),
+                    source VARCHAR(40) NOT NULL DEFAULT 'SIGNUP',
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )""",
+                """CREATE TABLE IF NOT EXISTS platform_settings (
+                    id VARCHAR(36) PRIMARY KEY,
+                    key VARCHAR(80) NOT NULL UNIQUE,
+                    value_json JSON NOT NULL DEFAULT '{}'::json,
+                    description TEXT NOT NULL DEFAULT '',
+                    category VARCHAR(40) NOT NULL DEFAULT 'GENERAL',
+                    updated_by VARCHAR(100) NOT NULL DEFAULT 'SYSTEM',
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )""",
+                """CREATE TABLE IF NOT EXISTS platform_settings_audit (
+                    id VARCHAR(36) PRIMARY KEY,
+                    setting_key VARCHAR(80) NOT NULL,
+                    old_value_json JSON,
+                    new_value_json JSON NOT NULL,
+                    changed_by VARCHAR(100) NOT NULL DEFAULT 'SYSTEM',
+                    client_ip VARCHAR(45),
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )""",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS locale VARCHAR(10) NOT NULL DEFAULT 'en'",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'",
+                "ALTER TABLE member_profiles ADD COLUMN IF NOT EXISTS platform_role VARCHAR(30) NOT NULL DEFAULT 'USER'",
+                "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS visibility VARCHAR(30) NOT NULL DEFAULT 'public'",
+                "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS organization_id VARCHAR(36) REFERENCES organizations(id) ON DELETE SET NULL",
+                "ALTER TABLE offline_contests ADD COLUMN IF NOT EXISTS rules_version VARCHAR(20) NOT NULL DEFAULT '1.0.0'",
+                "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS rules_version_accepted VARCHAR(20)",
+                "ALTER TABLE contest_registrations ADD COLUMN IF NOT EXISTS rules_accepted_at TIMESTAMPTZ",
+                "ALTER TABLE organization_memberships ALTER COLUMN id TYPE VARCHAR(64)",
+                "CREATE INDEX IF NOT EXISTS ix_org_memberships_member ON organization_memberships(member_id)",
+                "CREATE INDEX IF NOT EXISTS ix_org_memberships_org ON organization_memberships(organization_id)",
+                "CREATE INDEX IF NOT EXISTS ix_org_domains_domain ON organization_domains(domain)",
+                "CREATE INDEX IF NOT EXISTS ix_user_consents_member ON user_consents(member_id, policy_type)",
+                "CREATE INDEX IF NOT EXISTS ix_offline_contests_visibility ON offline_contests(visibility)",
+                "CREATE INDEX IF NOT EXISTS ix_offline_contests_org ON offline_contests(organization_id)",
             ]:
                 try:
                     await session.execute(text(interview_ddl))
@@ -751,5 +850,17 @@ async def init_db():
             await BlueprintRegistryService.sync_preseeded_to_db(session)
     except Exception as seed_err:
         logger.warning("Notice on seeding preseeded interview blueprints: %s", seed_err)
+
+    # Pre-seed default organizations, versioned policies, and platform settings
+    try:
+        from app.services.organization_service import OrganizationService
+        from app.services.policy_service import PolicyService
+        from app.services.platform_settings_service import PlatformSettingsService
+        async with AsyncSessionLocal() as session:
+            await OrganizationService.sync_default_organizations(session)
+            await PolicyService.sync_default_policies(session)
+            await PlatformSettingsService.sync_default_settings(session)
+    except Exception as global_seed_err:
+        logger.warning("Notice on seeding global platform defaults: %s", global_seed_err)
 
 

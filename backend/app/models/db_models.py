@@ -44,6 +44,20 @@ from .interview import (
     InterviewReport,
     CandidateProfile,
 )
+from .organization import (
+    Organization,
+    OrganizationDomain,
+    OrganizationMembership,
+    OrganizationInvitation,
+)
+from .policy import (
+    PlatformPolicy,
+    UserConsent,
+)
+from .settings import (
+    PlatformSetting,
+    PlatformSettingAudit,
+)
 
 __all__ = [
     "Base",
@@ -58,26 +72,34 @@ __all__ = [
     "ContestSubmission",
     "ScoreboardEntry",
     "ContestRegistration",
-    "Problem",
-    "ProblemVersion",
-    "ProblemTestCase",
-    "MemberProblemStats",
     "Assessment",
     "AssessmentProblem",
     "AssessmentSession",
     "AssessmentSubmission",
+    "Problem",
+    "ProblemVersion",
+    "ProblemTestCase",
+    "MemberProblemStats",
     "TrustProof",
     "CampusPass",
     "Announcement",
     "ResourceVersion",
-    "OutboxEvent",
     "JudgeJob",
     "JudgeJobAttempt",
+    "OutboxEvent",
     "InterviewSession",
     "InterviewQuestion",
     "InterviewAnswer",
     "InterviewEvaluation",
     "InterviewReport",
     "CandidateProfile",
+    "Organization",
+    "OrganizationDomain",
+    "OrganizationMembership",
+    "OrganizationInvitation",
+    "PlatformPolicy",
+    "UserConsent",
+    "PlatformSetting",
+    "PlatformSettingAudit",
 ]
 
