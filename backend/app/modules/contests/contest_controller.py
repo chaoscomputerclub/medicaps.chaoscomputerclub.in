@@ -136,11 +136,17 @@ class ContestController:
         slug: str,
         current_member: MemberProfile,
         db: AsyncSession,
+        payload: Optional[Any] = None,
+        client_ip: Optional[str] = None,
+        user_agent: Optional[str] = None,
     ) -> Dict[str, Any]:
         return await ContestService.register_for_contest(
             slug=slug,
             current_member=current_member,
             db=db,
+            payload=payload,
+            client_ip=client_ip,
+            user_agent=user_agent,
         )
 
     @staticmethod

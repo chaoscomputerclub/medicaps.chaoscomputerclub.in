@@ -39,4 +39,7 @@ def to_member_public(member: MemberProfile) -> MemberPublic:
         bio=getattr(member, "bio", None),
         github_username=getattr(member, "github_username", None),
         linkedin_url=getattr(member, "linkedin_url", None),
+        locale=getattr(member, "locale", "en"),
+        timezone=getattr(member, "timezone", "UTC"),
+        platform_role=getattr(member, "platform_role", "USER"),
     )

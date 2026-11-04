@@ -63,7 +63,11 @@ class ContestRepository:
         db: AsyncSession,
         status: Optional[str] = None,
         division: Optional[str] = None,
+        current_member: Optional[Any] = None,
     ) -> Sequence[OfflineContest]:
+        from sqlalchemy import or_, and_
+        from app.models.organization import OrganizationMembership
+
         stmt = (
             select(OfflineContest)
             .options(
@@ -76,6 +80,37 @@ class ContestRepository:
             stmt = stmt.where(OfflineContest.status == status)
         if division:
             stmt = stmt.where(OfflineContest.division == division)
+
+        is_admin = bool(
+            current_member
+            and (
+                getattr(current_member, "is_core_member", False)
+                or getattr(current_member, "platform_role", "") in ("CORE_MEMBER", "PLATFORM_ADMIN")
+            )
+        )
+        if not is_admin:
+            user_org_ids = []
+            if current_member:
+                mem_stmt = select(OrganizationMembership.organization_id).where(
+                    OrganizationMembership.member_id == current_member.id,
+                    OrganizationMembership.status == "ACTIVE",
+                )
+                mem_res = await db.execute(mem_stmt)
+                user_org_ids = [r[0] for r in mem_res.all()]
+
+            visibility_cond = [
+                OfflineContest.visibility == "public",
+                OfflineContest.visibility.is_(None),
+            ]
+            if user_org_ids:
+                visibility_cond.append(
+                    and_(
+                        OfflineContest.visibility == "organization_private",
+                        OfflineContest.organization_id.in_(user_org_ids),
+                    )
+                )
+            stmt = stmt.where(or_(*visibility_cond))
+
         res = await db.execute(stmt)
         return res.scalars().all()
 

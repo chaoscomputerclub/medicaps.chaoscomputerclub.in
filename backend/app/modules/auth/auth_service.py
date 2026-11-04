@@ -90,6 +90,13 @@ class AuthService:
             member.updated_at = datetime.now(timezone.utc)
             await AuthRepository.save(db, member)
 
+        # Auto-associate with organization workspace if domain matches verified claim
+        try:
+            from app.services.organization_service import OrganizationService
+            await OrganizationService.auto_associate_by_email_domain(member.id, member.email, db)
+        except Exception as org_assoc_err:
+            logger.debug("Organization auto-association notice: %s", org_assoc_err)
+
         token = create_access_token({"sub": member.id, "email": member.email})
         refresh_token = generate_refresh_token()
         await store_refresh_token(refresh_token, member.id, member.email)

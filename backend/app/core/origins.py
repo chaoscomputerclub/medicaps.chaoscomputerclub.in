@@ -32,6 +32,8 @@ _DEFAULT_PRODUCTION_ORIGINS: Set[str] = {
     "https://medicaps-api.chaoscomputerclub.in",
     "https://chaoscomputerclub.in",
     "https://www.chaoscomputerclub.in",
+    "https://app.chaoscomputerclub.in",
+    "https://api.chaoscomputerclub.in",
     "https://admin.chaoscomputerclub.in",
     "https://admin.medicaps.chaoscomputerclub.in",
 }
@@ -45,6 +47,10 @@ _LOCALHOST_REGEX = re.compile(
 def get_allowed_production_origins() -> Set[str]:
     """Returns the set of explicitly allowed production frontend origins."""
     origins = set(_DEFAULT_PRODUCTION_ORIGINS)
+    if getattr(settings, "MARKETING_BASE_URL", None) and not is_localhost_origin(settings.MARKETING_BASE_URL):
+        origins.add(settings.MARKETING_BASE_URL.rstrip("/"))
+    if getattr(settings, "APP_BASE_URL", None) and not is_localhost_origin(settings.APP_BASE_URL):
+        origins.add(settings.APP_BASE_URL.rstrip("/"))
     if settings.FRONTEND_URL and not is_localhost_origin(settings.FRONTEND_URL):
         origins.add(settings.FRONTEND_URL.rstrip("/"))
     if settings.cors_origins_list:

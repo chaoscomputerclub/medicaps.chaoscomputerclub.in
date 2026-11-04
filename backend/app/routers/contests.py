@@ -14,8 +14,10 @@ from app.models.db_models import MemberProfile
 from app.models.schemas import (
     ContestArenaResponse,
     ContestProblemResponse,
+    ContestRegisterRequest,
     OfflineContestResponse,
 )
+from app.core.cloudflare import get_client_ip
 from app.middleware.auth import (
     get_current_member,
     get_current_member_optional,
@@ -164,6 +166,8 @@ async def get_registration_status(
 @router.post("/{slug}/register")
 async def register_for_contest(
     slug: str,
+    request: Request,
+    payload: Optional[ContestRegisterRequest] = None,
     db: AsyncSession = Depends(get_db),
     current_member: MemberProfile = Depends(get_current_member),
 ):
@@ -172,6 +176,9 @@ async def register_for_contest(
         slug=slug,
         current_member=current_member,
         db=db,
+        payload=payload,
+        client_ip=get_client_ip(request),
+        user_agent=request.headers.get("user-agent"),
     )
 
 

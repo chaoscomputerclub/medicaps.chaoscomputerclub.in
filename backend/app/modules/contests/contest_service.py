@@ -694,6 +694,9 @@ class ContestService:
         slug: str,
         current_member: MemberProfile,
         db: AsyncSession,
+        payload: Optional[Any] = None,
+        client_ip: Optional[str] = None,
+        user_agent: Optional[str] = None,
     ) -> Dict[str, Any]:
         # Lock contest row with with_for_update() to prevent concurrent registration over-capacity race condition
         stmt = select(OfflineContest).where(OfflineContest.slug == slug).with_for_update()
@@ -701,6 +704,23 @@ class ContestService:
         contest = res.scalar_one_or_none()
         if not contest:
             raise HTTPException(status_code=404, detail=f"Contest '{slug}' not found.")
+
+        # Check organization private visibility
+        if getattr(contest, "visibility", "public") == "organization_private" and getattr(contest, "organization_id", None):
+            is_admin_or_core = getattr(current_member, "platform_role", None) in ("PLATFORM_ADMIN", "SECURITY_ADMIN") or current_member.role in ("ADMIN", "CORE")
+            if not is_admin_or_core:
+                from app.models.organization import OrganizationMembership
+                mem_stmt = select(OrganizationMembership).where(
+                    OrganizationMembership.member_id == current_member.id,
+                    OrganizationMembership.organization_id == contest.organization_id,
+                    OrganizationMembership.status == "ACTIVE",
+                )
+                mem_res = await db.execute(mem_stmt)
+                if not mem_res.scalar_one_or_none():
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Contest is restricted to members of the hosting organization.",
+                    )
 
         if contest.status not in ("upcoming", "live"):
             raise HTTPException(
@@ -733,14 +753,45 @@ class ContestService:
         if contest.registered_count >= contest.seat_capacity:
             raise HTTPException(status_code=400, detail="Registration capacity reached for this online contest.")
 
+        rules_accepted = None
+        contest_rules_ver = getattr(contest, "rules_version", None) or "1.0.0"
+        if payload and getattr(payload, "rules_version_accepted", None):
+            provided_ver = payload.rules_version_accepted
+            if provided_ver != contest_rules_ver:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Contest rules version mismatch. Expected '{contest_rules_ver}', got '{provided_ver}'.",
+                )
+            rules_accepted = provided_ver
+        else:
+            rules_accepted = contest_rules_ver
+
         new_reg = ContestRegistration(
             contest_id=contest.id,
             member_id=current_member.id,
             status="confirmed",
+            rules_version_accepted=rules_accepted,
+            rules_accepted_at=now_utc() if rules_accepted else None,
         )
         db.add(new_reg)
         contest.registered_count += 1
         reg_time = now_utc().isoformat()
+
+        if rules_accepted:
+            try:
+                from app.services.policy_service import PolicyService
+                await PolicyService.record_consent(
+                    member_id=current_member.id,
+                    policy_type="CONTEST_RULES",
+                    version=rules_accepted,
+                    source="CONTEST_REGISTRATION",
+                    ip_address=client_ip,
+                    user_agent=user_agent,
+                    metadata={"contest_id": contest.id, "contest_slug": contest.slug},
+                    db=db,
+                )
+            except Exception as e:
+                logger.warning("Could not record policy consent during registration: %s", e)
 
         # Transactional Outbox Event inside active DB transaction
         await record_outbox_event(

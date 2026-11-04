@@ -79,6 +79,7 @@ class OAuthService:
         # 2. Cryptographically sign the target origin and nonce into the OAuth state
         redirect_uri = _get_redirect_uri(request)
         state = encode_oauth_state(target_origin, return_path)
+        hd_param = f"&hd={settings.ALLOWED_EMAIL_DOMAIN}" if getattr(settings, "ENFORCE_STRICT_EMAIL_DOMAIN", False) and getattr(settings, "ALLOWED_EMAIL_DOMAIN", None) else ""
         google_auth_url = (
             "https://accounts.google.com/o/oauth2/v2/auth"
             f"?client_id={settings.GOOGLE_CLIENT_ID}"
@@ -88,7 +89,7 @@ class OAuthService:
             f"&access_type=offline"
             f"&prompt=select_account"
             f"&state={state}"
-            f"&hd={settings.ALLOWED_EMAIL_DOMAIN or 'medicaps.ac.in'}"
+            f"{hd_param}"
         )
         res = RedirectResponse(url=google_auth_url)
         res.set_cookie(
@@ -168,7 +169,7 @@ class OAuthService:
         if not email or not google_id:
             return RedirectResponse(url=f"{frontend_url}/auth?error=google_no_email")
 
-        if not is_allowed_organization_email(email):
+        if getattr(settings, "ENFORCE_STRICT_EMAIL_DOMAIN", False) and not is_allowed_organization_email(email):
             logger.warning("Rejected non-organization Google account: %s", email)
             return RedirectResponse(url=f"{frontend_url}/auth?error=unauthorized_domain&email={email}")
 

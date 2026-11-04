@@ -21,14 +21,18 @@ _bg_otp_tasks: Set[asyncio.Task] = set()
 
 
 def is_allowed_organization_email(email: str) -> bool:
-    """Institutional access restriction: strictly Medi-Caps University emails (@medicaps.ac.in) or Core Team."""
+    """Access restriction check. In global platform mode (default), all valid emails are allowed."""
     if not email or "@" not in email:
         return False
     clean = email.strip().lower()
     if clean in settings.core_team_emails_set:
         return True
+    if not getattr(settings, "ENFORCE_STRICT_EMAIL_DOMAIN", False):
+        return True
+    allowed = (getattr(settings, "ALLOWED_EMAIL_DOMAIN", "") or "").lower()
+    if not allowed:
+        return True
     domain = clean.split("@")[1].strip().lower()
-    allowed = (settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in").lower()
     return domain == allowed or domain.endswith(f".{allowed}")
 
 
@@ -45,11 +49,11 @@ class OtpService:
         if not clean_email:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is required.")
 
-        if not is_allowed_organization_email(clean_email):
+        if getattr(settings, "ENFORCE_STRICT_EMAIL_DOMAIN", False) and not is_allowed_organization_email(clean_email):
             allowed = settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in"
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access restricted: Only @{allowed} organization emails are permitted. Gmail and personal accounts are strictly prohibited.",
+                detail=f"Access restricted: Only @{allowed} organization emails are permitted.",
             )
 
         client_ip = get_client_ip(request) if request else None
@@ -130,7 +134,7 @@ class OtpService:
         if not email:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Session corrupted. Please restart.")
 
-        if not is_allowed_organization_email(email):
+        if getattr(settings, "ENFORCE_STRICT_EMAIL_DOMAIN", False) and not is_allowed_organization_email(email):
             allowed = settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in"
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
