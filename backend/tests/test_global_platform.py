@@ -108,9 +108,9 @@ def test_global_email_normalization_allows_personal_emails():
     saved_flag = settings.ENFORCE_STRICT_EMAIL_DOMAIN
     try:
         settings.ENFORCE_STRICT_EMAIL_DOMAIN = False
-        assert normalise_email("cadet.alice@gmail.com") == "cadet.alice@gmail.com"
-        assert normalise_email("engineer@chaoscomputerclub.in") == "engineer@chaoscomputerclub.in"
-        assert normalise_email("student@medicaps.ac.in") == "student@medicaps.ac.in"
+        assert SendOTPRequest(email="cadet.alice@gmail.com").email == "cadet.alice@gmail.com"
+        assert SendOTPRequest(email="engineer@chaoscomputerclub.in").email == "engineer@chaoscomputerclub.in"
+        assert SendOTPRequest(email="student@medicaps.ac.in").email == "student@medicaps.ac.in"
     finally:
         settings.ENFORCE_STRICT_EMAIL_DOMAIN = saved_flag
 
@@ -120,9 +120,9 @@ def test_global_email_normalization_respects_strict_flag_if_enabled():
     saved_flag = settings.ENFORCE_STRICT_EMAIL_DOMAIN
     try:
         settings.ENFORCE_STRICT_EMAIL_DOMAIN = True
-        with pytest.raises(HTTPException) as exc_info:
-            normalise_email("hacker@external.com")
-        assert exc_info.value.status_code == 403
+        with pytest.raises(ValueError) as exc_info:
+            SendOTPRequest(email="hacker@external.com")
+        assert "access restricted" in str(exc_info.value).lower()
     finally:
         settings.ENFORCE_STRICT_EMAIL_DOMAIN = saved_flag
 
