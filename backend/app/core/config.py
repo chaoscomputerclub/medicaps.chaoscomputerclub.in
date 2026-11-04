@@ -191,9 +191,6 @@ class Settings(BaseSettings):
     MINIO_SECURE: bool = os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
     MINIO_PUBLIC_URL_PREFIX: str = os.getenv("MINIO_PUBLIC_URL_PREFIX", "")
 
-    # Voice & Speech Engine (HCVE)
-    SARVAM_API_KEY: str = os.getenv("SARVAM_API_KEY", "")
-
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT.lower() in ("production", "prod")

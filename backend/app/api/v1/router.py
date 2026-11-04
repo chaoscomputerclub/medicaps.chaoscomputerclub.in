@@ -13,7 +13,6 @@ from app.routers import (
     auth,
     contests,
     feed,
-    interview,
     jobs,
     leaderboard,
     passes,
@@ -26,8 +25,6 @@ from app.routers import (
     metrics,
     nodes,
     fabric,
-    hcve,
-    admin_interview,
     organizations,
     policies,
     admin_settings,
@@ -47,9 +44,6 @@ for domain_router in (
     social.router,
     storage.router,
     practice.router,
-    interview.router,
-    interview.canonical_interview_router,
-    admin_interview.router,
     organizations.router,
     policies.router,
     admin_settings.router,
@@ -58,7 +52,6 @@ for domain_router in (
     metrics.router,
     nodes.router,
     fabric.router,
-    hcve.router,
 ):
     api_router_v1.include_router(domain_router)
 

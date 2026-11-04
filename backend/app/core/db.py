@@ -532,162 +532,8 @@ async def ensure_database_integrity():
                 except Exception as p_err:
                     print(f"Notice on practice DDL: {p_err}")
 
-            # 10. Schema Evolution: AI Interview Practice Platform
-            for interview_ddl in [
-                """CREATE TABLE IF NOT EXISTS interview_sessions (
-                    id VARCHAR(36) PRIMARY KEY,
-                    member_id VARCHAR(36) NOT NULL REFERENCES member_profiles(id) ON DELETE CASCADE,
-                    target_role VARCHAR(100) NOT NULL,
-                    experience_level VARCHAR(20) NOT NULL DEFAULT 'ENTRY_LEVEL',
-                    category VARCHAR(40) NOT NULL DEFAULT 'TECHNICAL',
-                    difficulty VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
-                    duration_minutes INTEGER NOT NULL DEFAULT 30,
-                    preferred_language VARCHAR(30) NOT NULL DEFAULT 'python',
-                    focus_topics JSON DEFAULT '[]'::json,
-                    job_description TEXT,
-                    resume_notes TEXT,
-                    state VARCHAR(30) NOT NULL DEFAULT 'CREATED',
-                    current_question_index INTEGER NOT NULL DEFAULT 0,
-                    total_questions_planned INTEGER NOT NULL DEFAULT 4,
-                    plan_metadata JSON DEFAULT '{}'::json,
-                    started_at TIMESTAMPTZ,
-                    paused_at TIMESTAMPTZ,
-                    completed_at TIMESTAMPTZ,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                """CREATE TABLE IF NOT EXISTS interview_questions (
-                    id VARCHAR(36) PRIMARY KEY,
-                    session_id VARCHAR(36) NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
-                    order_index INTEGER NOT NULL DEFAULT 0,
-                    parent_question_id VARCHAR(36) REFERENCES interview_questions(id) ON DELETE SET NULL,
-                    question_type VARCHAR(30) NOT NULL DEFAULT 'PRIMARY',
-                    topic VARCHAR(80) NOT NULL,
-                    title VARCHAR(200) NOT NULL,
-                    prompt TEXT NOT NULL,
-                    code_starter TEXT,
-                    judge_problem_slug VARCHAR(100),
-                    expected_criteria JSON DEFAULT '[]'::json,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                """CREATE TABLE IF NOT EXISTS interview_answers (
-                    id VARCHAR(36) PRIMARY KEY,
-                    session_id VARCHAR(36) NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
-                    question_id VARCHAR(36) NOT NULL REFERENCES interview_questions(id) ON DELETE CASCADE,
-                    idempotency_key VARCHAR(64) NOT NULL UNIQUE,
-                    answer_text TEXT NOT NULL,
-                    submitted_code TEXT,
-                    judge_result JSON,
-                    audio_duration_seconds DOUBLE PRECISION,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                """CREATE TABLE IF NOT EXISTS interview_evaluations (
-                    id VARCHAR(36) PRIMARY KEY,
-                    session_id VARCHAR(36) NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
-                    question_id VARCHAR(36) NOT NULL REFERENCES interview_questions(id) ON DELETE CASCADE,
-                    answer_id VARCHAR(36) NOT NULL REFERENCES interview_answers(id) ON DELETE CASCADE,
-                    score INTEGER NOT NULL DEFAULT 0,
-                    rubric_scores JSON DEFAULT '{}'::json,
-                    strengths JSON DEFAULT '[]'::json,
-                    gaps JSON DEFAULT '[]'::json,
-                    evidence_quotes JSON DEFAULT '[]'::json,
-                    model_answer TEXT NOT NULL,
-                    follow_up_recommended BOOLEAN NOT NULL DEFAULT FALSE,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                """CREATE TABLE IF NOT EXISTS interview_reports (
-                    id VARCHAR(36) PRIMARY KEY,
-                    session_id VARCHAR(36) NOT NULL UNIQUE REFERENCES interview_sessions(id) ON DELETE CASCADE,
-                    member_id VARCHAR(36) NOT NULL REFERENCES member_profiles(id) ON DELETE CASCADE,
-                    overall_score INTEGER NOT NULL DEFAULT 0,
-                    verdict VARCHAR(40) NOT NULL DEFAULT 'LEANING_HIRE',
-                    executive_summary TEXT NOT NULL,
-                    dimension_breakdown JSON DEFAULT '{}'::json,
-                    top_strengths JSON DEFAULT '[]'::json,
-                    areas_to_improve JSON DEFAULT '[]'::json,
-                    recommended_practice JSON DEFAULT '[]'::json,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                """CREATE TABLE IF NOT EXISTS candidate_profiles (
-                    id VARCHAR(36) PRIMARY KEY,
-                    member_id VARCHAR(36) NOT NULL UNIQUE REFERENCES member_profiles(id) ON DELETE CASCADE,
-                    declared_skills JSON DEFAULT '[]'::json,
-                    demonstrated_strengths JSON DEFAULT '[]'::json,
-                    developmental_gaps JSON DEFAULT '[]'::json,
-                    preferred_tracks JSON DEFAULT '[]'::json,
-                    resume_summary TEXT,
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                "CREATE INDEX IF NOT EXISTS ix_interview_sessions_member ON interview_sessions(member_id, state)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_sessions_state ON interview_sessions(state)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_questions_session_order ON interview_questions(session_id, order_index)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_answers_session ON interview_answers(session_id)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_answers_question ON interview_answers(question_id)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_answers_idemp ON interview_answers(idempotency_key)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_evaluations_session ON interview_evaluations(session_id)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_reports_member ON interview_reports(member_id, created_at DESC)",
-                """CREATE TABLE IF NOT EXISTS interview_domains (
-                    id VARCHAR(36) PRIMARY KEY,
-                    slug VARCHAR(50) NOT NULL UNIQUE,
-                    name VARCHAR(100) NOT NULL,
-                    description TEXT NOT NULL,
-                    category VARCHAR(30) NOT NULL DEFAULT 'TECHNICAL',
-                    icon_key VARCHAR(50) NOT NULL DEFAULT 'code',
-                    display_order INTEGER NOT NULL DEFAULT 0,
-                    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                """CREATE TABLE IF NOT EXISTS interview_blueprints (
-                    id VARCHAR(36) PRIMARY KEY,
-                    domain_id VARCHAR(36) NOT NULL REFERENCES interview_domains(id) ON DELETE CASCADE,
-                    slug VARCHAR(50) NOT NULL UNIQUE,
-                    title VARCHAR(150) NOT NULL,
-                    description TEXT NOT NULL,
-                    status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
-                    active_version_id VARCHAR(36),
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                """CREATE TABLE IF NOT EXISTS interview_blueprint_versions (
-                    id VARCHAR(36) PRIMARY KEY,
-                    blueprint_id VARCHAR(36) NOT NULL REFERENCES interview_blueprints(id) ON DELETE CASCADE,
-                    version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
-                    schema_version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
-                    curriculum_version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
-                    taxonomy_version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
-                    prompt_pack_version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
-                    evaluation_pack_version VARCHAR(20) NOT NULL DEFAULT '1.0.0',
-                    status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
-                    checksum VARCHAR(64),
-                    graph_data JSON NOT NULL DEFAULT '{}'::json,
-                    public_metadata JSON NOT NULL DEFAULT '{}'::json,
-                    validation_report JSON NOT NULL DEFAULT '{}'::json,
-                    coverage_report JSON NOT NULL DEFAULT '{}'::json,
-                    published_at TIMESTAMPTZ,
-                    created_by VARCHAR(50) NOT NULL DEFAULT 'SYSTEM',
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    CONSTRAINT uq_interview_blueprint_versions_bp_ver UNIQUE (blueprint_id, version)
-                )""",
-                """CREATE TABLE IF NOT EXISTS interview_domain_datasets (
-                    id VARCHAR(36) PRIMARY KEY,
-                    blueprint_version_id VARCHAR(36) NOT NULL REFERENCES interview_blueprint_versions(id) ON DELETE CASCADE,
-                    dataset_type VARCHAR(40) NOT NULL,
-                    records_count INTEGER NOT NULL DEFAULT 0,
-                    data_records JSON NOT NULL DEFAULT '[]'::json,
-                    checksum VARCHAR(64),
-                    status VARCHAR(30) NOT NULL DEFAULT 'DRAFT',
-                    evaluation_report JSON NOT NULL DEFAULT '{}'::json,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )""",
-                "CREATE INDEX IF NOT EXISTS ix_interview_domains_slug ON interview_domains(slug)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_blueprints_domain ON interview_blueprints(domain_id)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_blueprints_slug ON interview_blueprints(slug)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_blueprint_versions_bp ON interview_blueprint_versions(blueprint_id)",
-                "CREATE INDEX IF NOT EXISTS ix_interview_domain_datasets_bp_ver ON interview_domain_datasets(blueprint_version_id)",
-                # ── Global Platform & Organizations (Migration 0008) ─────────────
+            # 10. Global Platform & Organizations (Migration 0008)
+            for global_platform_ddl in [
                 """CREATE TABLE IF NOT EXISTS organizations (
                     id VARCHAR(36) PRIMARY KEY,
                     slug VARCHAR(60) NOT NULL UNIQUE,
@@ -788,9 +634,9 @@ async def ensure_database_integrity():
                 "CREATE INDEX IF NOT EXISTS ix_offline_contests_org ON offline_contests(organization_id)",
             ]:
                 try:
-                    await session.execute(text(interview_ddl))
+                    await session.execute(text(global_platform_ddl))
                 except Exception as i_err:
-                    print(f"Notice on interview DDL: {i_err}")
+                    print(f"Notice on global platform DDL: {i_err}")
 
             await session.commit()
         except Exception as e:
@@ -826,7 +672,6 @@ async def get_current_resource_version(session: AsyncSession, resource_id: str) 
 async def init_db():
     """Create all database tables on initial startup and verify relational schema integrity."""
     import app.models.db_models  # noqa: F401
-    import app.models.interview  # noqa: F401
 
     run_startup_ddl = os.getenv("RUN_STARTUP_DDL", "true").lower() in ("true", "1", "yes")
     if not run_startup_ddl:
@@ -842,14 +687,6 @@ async def init_db():
             raise
 
     await ensure_database_integrity()
-
-    # Pre-seed canonical interview blueprints into relational PostgreSQL tables
-    try:
-        from app.services.interview.blueprint_registry import BlueprintRegistryService
-        async with AsyncSessionLocal() as session:
-            await BlueprintRegistryService.sync_preseeded_to_db(session)
-    except Exception as seed_err:
-        logger.warning("Notice on seeding preseeded interview blueprints: %s", seed_err)
 
     # Pre-seed default organizations, versioned policies, and platform settings
     try:

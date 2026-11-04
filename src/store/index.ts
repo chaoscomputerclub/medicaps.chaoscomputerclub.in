@@ -5,7 +5,6 @@ import uiReducer from "./slices/uiSlice";
 import assessmentReducer from "./slices/assessmentSlice";
 import socialReducer from "./slices/socialSlice";
 import contestReducer from "./slices/contestSlice";
-import interviewReducer from "./slices/interviewSlice";
 
 const appReducer = combineReducers({
   auth: authReducer,
@@ -14,7 +13,6 @@ const appReducer = combineReducers({
   assessment: assessmentReducer,
   social: socialReducer,
   contest: contestReducer,
-  interview: interviewReducer,
 });
 
 const rootReducer = (state: ReturnType<typeof appReducer> | undefined, action: any) => {
