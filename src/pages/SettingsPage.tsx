@@ -1038,7 +1038,7 @@ export function SettingsPage() {
 
               <SettingSection
                 title="Connected Accounts"
-                description="Authentication providers linked to your Medi-Caps institutional credential."
+                description="Authentication providers linked to your account."
               >
                 <div className="flex items-center justify-between py-1">
                   <div className="flex items-center gap-3">

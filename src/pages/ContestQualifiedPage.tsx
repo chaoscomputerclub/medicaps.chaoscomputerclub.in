@@ -185,7 +185,7 @@ export function ContestQualifiedPage() {
                 {/* Status Bar */}
                 <div className="flex items-center justify-between w-full border-b border-white/[0.08] pb-3.5">
                   <span className="font-heading font-bold text-[10px] uppercase tracking-wider text-[#B1FA63]">
-                    Medi-Caps Campus Gate Pass
+                    Official Competition Gate Pass
                   </span>
                   <span className={`font-heading text-[10px] uppercase font-bold rounded-full px-2.5 py-0.5 border ${
                     isCheckedIn
@@ -279,7 +279,7 @@ export function ContestQualifiedPage() {
                 <ul className="space-y-2.5 font-sans text-xs text-zinc-300">
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#B1FA63] font-heading font-bold shrink-0">01.</span>
-                    <span>Present this digital pass at the entrance of the Medi-Caps Computing Complex for proctor scan.</span>
+                    <span>Present this digital pass at the entrance of the tournament computing venue for proctor scan.</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="text-[#B1FA63] font-heading font-bold shrink-0">02.</span>

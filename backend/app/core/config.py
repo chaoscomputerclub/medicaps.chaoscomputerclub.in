@@ -16,11 +16,19 @@ load_dotenv(BASE_DIR / ".env", override=True)
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "Arena API")
-    VERSION: str = os.getenv("VERSION", "1.6.0")
+    VERSION: str = os.getenv("VERSION", "1.7.0")
     API_PREFIX: str = "/api"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "production")
     PROCESS_ROLE: str = os.getenv("PROCESS_ROLE", "combined").strip().lower()
     ENABLE_API_DOCS: bool = os.getenv("ENABLE_API_DOCS", "false").lower() in ("true", "1", "yes")
+
+    # Global Platform Identity & Host Topology
+    PLATFORM_NAME: str = os.getenv("PLATFORM_NAME", "Chaos Computer Club Arena")
+    PLATFORM_BASE_DOMAIN: str = os.getenv("PLATFORM_BASE_DOMAIN", "chaoscomputerclub.in")
+    MARKETING_BASE_URL: str = os.getenv("MARKETING_BASE_URL", "https://chaoscomputerclub.in")
+    APP_BASE_URL: str = os.getenv("APP_BASE_URL", "https://app.chaoscomputerclub.in")
+    API_BASE_URL: str = os.getenv("API_BASE_URL", "https://api.chaoscomputerclub.in")
+    ADMIN_BASE_URL: str = os.getenv("ADMIN_BASE_URL", "https://admin.chaoscomputerclub.in")
 
     # Host & Port
     HOST: str = os.getenv("HOST", "0.0.0.0")
@@ -47,8 +55,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))  # 30 days long-lived refresh
 
-    # Core Team & Chief Proctor Access Control (ENV Driven - Fails closed if not set)
-    ALLOWED_EMAIL_DOMAIN: str = os.getenv("ALLOWED_EMAIL_DOMAIN", "medicaps.ac.in")
+    # Registration & Access Control (Global by default; domain restriction is strictly optional)
+    ENFORCE_STRICT_EMAIL_DOMAIN: bool = os.getenv("ENFORCE_STRICT_EMAIL_DOMAIN", "false").lower() in ("true", "1", "yes")
+    ALLOWED_EMAIL_DOMAIN: Optional[str] = os.getenv("ALLOWED_EMAIL_DOMAIN", None)
     CONTACT_EMAIL: Optional[str] = os.getenv("CONTACT_EMAIL", "info@chaoscomputerclub.in")
     CORE_TEAM_EMAILS: Optional[str] = os.getenv("CORE_TEAM_EMAILS", "")
     CORE_TEAM_HANDLES: Optional[str] = os.getenv("CORE_TEAM_HANDLES", "")

@@ -143,7 +143,7 @@ export function ContestOfflinePage() {
           </span>
         }
         title={contest.title}
-        description="Air-gapped proctored workstation environment at Medi-Caps Computing Complex."
+        description="Air-gapped proctored workstation environment at authorized tournament venue."
       />
 
       {/* Hero Live Arena Launcher */}
