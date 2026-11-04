@@ -111,10 +111,17 @@ class ContestDetailResponse(BaseModel):
     cadence: Optional[str] = "weekly"
     edition: Optional[int] = None
     banner_url: Optional[str] = None
+    visibility: Optional[str] = "public"
+    organization_id: Optional[str] = None
+    rules_version: Optional[str] = "1.0.0"
     registered: bool = False
     is_submitted: Optional[bool] = False
     problems: List[ContestProblemResponse] = []
     assessment: Optional[AssessmentSummaryResponse] = None
+
+
+class ContestRegisterRequest(BaseModel):
+    rules_version_accepted: Optional[str] = None
 
 
 # Backwards-compatibility alias

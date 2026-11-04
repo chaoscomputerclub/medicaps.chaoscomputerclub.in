@@ -14,17 +14,18 @@ class SendOTPRequest(BaseModel):
     @classmethod
     def normalise_email(cls, v: str) -> str:
         clean = v.strip().lower()
-        if "@" not in clean:
-            raise ValueError("A valid institutional email address is required.")
+        if "@" not in clean or "." not in clean.split("@")[-1]:
+            raise ValueError("A valid email address is required.")
         from app.core.config import settings
         if clean in settings.core_team_emails_set:
             return clean
-        domain = clean.split("@")[-1].strip()
-        allowed = (settings.ALLOWED_EMAIL_DOMAIN or "medicaps.ac.in").lower()
-        if domain != allowed and not domain.endswith(f".{allowed}"):
-            raise ValueError(
-                f"Access restricted: Only @{allowed} organization emails are permitted. Gmail and personal accounts are strictly prohibited."
-            )
+        if getattr(settings, "ENFORCE_STRICT_EMAIL_DOMAIN", False) and getattr(settings, "ALLOWED_EMAIL_DOMAIN", None):
+            domain = clean.split("@")[-1].strip()
+            allowed = settings.ALLOWED_EMAIL_DOMAIN.lower()
+            if domain != allowed and not domain.endswith(f".{allowed}"):
+                raise ValueError(
+                    f"Access restricted: Only @{allowed} organization emails are permitted."
+                )
         return clean
 
 
@@ -84,6 +85,9 @@ class MemberPublic(BaseModel):
     attendance_count: Optional[int] = 0
     attendance_total: Optional[int] = 0
     percentile: Optional[float] = None
+    locale: Optional[str] = "en"
+    timezone: Optional[str] = "UTC"
+    platform_role: Optional[str] = "USER"
 
 
 class AuthTokenResponse(BaseModel):

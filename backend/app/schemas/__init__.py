@@ -25,6 +25,7 @@ from .contest import (
     ContestArenaResponse,
     ContestDetailResponse,
     ContestProblemResponse,
+    ContestRegisterRequest,
     ContestRegistrationResponse,
     ContestSummaryResponse,
     OfflineContestResponse,
@@ -72,6 +73,7 @@ __all__ = [
     "LeaderboardRow",
     # Contest
     "ContestProblemResponse",
+    "ContestRegisterRequest",
     "ContestArenaProblemResponse",
     "ContestArenaResponse",
     "ContestSummaryResponse",

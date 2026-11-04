@@ -28,6 +28,9 @@ from app.routers import (
     fabric,
     hcve,
     admin_interview,
+    organizations,
+    policies,
+    admin_settings,
 )
 
 api_router_v1 = APIRouter()
@@ -47,6 +50,9 @@ for domain_router in (
     interview.router,
     interview.canonical_interview_router,
     admin_interview.router,
+    organizations.router,
+    policies.router,
+    admin_settings.router,
     jobs.router,
     workers.router,
     metrics.router,
