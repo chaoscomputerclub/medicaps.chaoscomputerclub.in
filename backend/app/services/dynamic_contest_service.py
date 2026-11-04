@@ -1975,7 +1975,7 @@ class DynamicContestService:
             environment="Air-Gapped Workstation LAN · Clang 18 / GCC 14 / Python 3.12",
             chief_proctors=["Chief Proctor (CCC Core)", "CCC Operations Desk"],
             prize_pool=prize,
-            sponsor="Chaos Computer Club Medi-Caps Chapter",
+            sponsor="Chaos Computer Club",
             summary=summary,
             problems=problems,
             assessment=AssessmentConfigSchema(
