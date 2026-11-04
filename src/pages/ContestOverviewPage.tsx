@@ -264,7 +264,7 @@ export function ContestOverviewPage() {
             </h1>
             <p className="text-sm text-zinc-300 font-sans leading-relaxed">
               {contest.summary ||
-                "Official Medi-Caps University algorithmic programming tournament. Solve challenges under strict timing constraints to increase your university rating."}
+                "Official algorithmic programming tournament. Solve challenges under strict timing constraints to increase your global and workspace rating."}
             </p>
 
             {/* Quick Meta Row */}

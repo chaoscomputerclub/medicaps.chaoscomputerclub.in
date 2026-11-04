@@ -234,7 +234,7 @@ export const contestApi = {
     );
   },
 
-  async register(slug: string) {
+  async register(slug: string, rulesVersionAccepted: string = "1.0.0") {
     const res = await request<{
       registered: boolean;
       message: string;
@@ -245,7 +245,10 @@ export const contestApi = {
       registered_at?: string;
     }>(
       `/contests/${encodeURIComponent(slug)}/register`,
-      { method: "POST" }
+      {
+        method: "POST",
+        body: JSON.stringify({ rules_version_accepted: rulesVersionAccepted }),
+      }
     );
     // Invalidate all client-side SWR caches representing this contest and member registration.
     // Order matters: invalidate first, then seed authoritative values so they survive the next fetch.

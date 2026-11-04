@@ -41,20 +41,20 @@ export function RegisterConfirmModal({
 
   const handleConfirmRegistration = async () => {
     if (!isAuthenticated()) {
-      toast.error("Please sign in to your Medi-Caps account to register.");
+      toast.error("Please sign in to register.");
       onOpenChange(false);
       navigate("/auth");
       return;
     }
 
     if (!agreed) {
-      toast.error("You must accept the competition rules and integrity agreement.");
+      toast.error("You must accept the contest rules and integrity agreement.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res = await registerForContest(contest.slug);
+      const res = await registerForContest(contest.slug, "1.0.0");
       toast.success(res.message || `Registered successfully for ${contest.title}!`);
       onSuccess();
       onOpenChange(false);
@@ -111,8 +111,8 @@ export function RegisterConfirmModal({
                   Open Registration & Elo Rated
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Open to all Medi-Caps students. Performance officially impacts your campus ranking
-                  and Elo rating.
+                  Open to all registered engineers and cadets. Performance officially impacts your platform
+                  and division Elo rating.
                 </p>
               </div>
             </div>
@@ -124,7 +124,7 @@ export function RegisterConfirmModal({
                   Contest Arena
                 </strong>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  {contest.logistics?.venue || "Online Arena · Medi-Caps University"}
+                  {contest.logistics?.venue || "Online Arena · Chaos Computer Club"}
                 </p>
               </div>
             </div>
@@ -138,8 +138,15 @@ export function RegisterConfirmModal({
               className="mt-0.5 border-white/20 data-[state=checked]:bg-[#B1FA63] data-[state=checked]:text-black"
             />
             <span className="text-xs text-zinc-300 leading-relaxed">
-              I certify that I am an enrolled Medi-Caps University student. I agree to abide by the
-              university competition code of conduct and fair play integrity guidelines.
+              I agree to abide by the official{" "}
+              <a href="/rules" target="_blank" rel="noreferrer" className="underline text-[#B1FA63] hover:text-[#B1FA63]/80" onClick={(e) => e.stopPropagation()}>
+                Contest Rules (v1.0.0)
+              </a>{" "}
+              and{" "}
+              <a href="/conduct" target="_blank" rel="noreferrer" className="underline text-[#B1FA63] hover:text-[#B1FA63]/80" onClick={(e) => e.stopPropagation()}>
+                Code of Conduct
+              </a>
+              . I understand that process sandboxing, telemetry monitoring, and plagiarism analysis are enforced.
             </span>
           </label>
         </div>

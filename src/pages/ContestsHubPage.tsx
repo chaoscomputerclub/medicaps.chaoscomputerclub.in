@@ -436,21 +436,21 @@ export function ContestsHubPage() {
             <div className="absolute -inset-4 rounded-full bg-lime-400/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             <img
               src="/trophy.png"
-              alt="Medi-Caps Contest Trophy"
+              alt="Arena Championship Trophy"
               className="relative w-28 h-32 sm:w-32 sm:h-36 object-contain filter -[0_12px_30px_rgba(203,255,0,0.22)] select-none pointer-events-none transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1 group-hover:-[0_16px_36px_rgba(203,255,0,0.4)]"
             />
           </div>
 
           <div className="space-y-2">
             <h1 className="text-4xl sm:text-5xl font-normal tracking-wide text-white font-display uppercase">
-              CCC Medi-Caps Contest
+              CCC Arena Tournaments
             </h1>
             <p className="text-sm sm:text-base text-zinc-400 font-sans max-w-lg mx-auto">
               Weekly competitive programming arena. Solve algorithmic challenges, elevate your rating, and claim the championship!
             </p>
             <div className="group inline-flex items-center gap-2 text-xs font-sans text-zinc-400 bg-white/[0.03] border border-white/8 hover:border-lime-400/30 rounded-full px-3.5 py-1.5 mt-1 transition-all duration-200">
               <Trophy className="size-3.5 text-lime-400 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
-              <span>Official Medi-Caps Chapter Championship Trophy</span>
+              <span>Official Arena Championship Trophy</span>
             </div>
           </div>
 
@@ -567,7 +567,7 @@ export function ContestsHubPage() {
                               <Users className="size-3.5 text-zinc-500 transition-transform duration-200 group-hover:scale-110 group-hover:text-zinc-300" />
                               <span>{contest.registered_count} cadets registered</span>
                               <span className="text-zinc-600">·</span>
-                              <span className="text-lime-400/90 font-semibold">Medi-Caps Arena</span>
+                              <span className="text-lime-400/90 font-semibold">Live Arena</span>
                             </p>
                           </div>
                         </div>
@@ -1168,10 +1168,10 @@ export function ContestsHubPage() {
         <div className="group rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-7 sm:p-8 text-center max-w-3xl mx-auto space-y-2.5 mt-8 hover:border-[#B1FA63]/30 transition-all duration-200">
           <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-heading font-bold text-[#B1FA63] uppercase tracking-wider">
             <Trophy className="size-4 sm:size-5 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12" />
-            <span>About the Medi-Caps Chapter Trophy</span>
+            <span>About the Arena Championship Trophy</span>
           </div>
           <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans max-w-2xl mx-auto">
-            The Chaos Computer Club Championship Trophy is awarded to the highest-ranking cadet at Medi-Caps University across rated competitive programming rounds. It recognizes campus leadership in algorithms, data structures, and speed.
+            The Chaos Computer Club Championship Trophy is awarded to the highest-ranking engineer across rated competitive programming rounds. It recognizes leadership in algorithms, data structures, and speed.
           </p>
         </div>
       </div>

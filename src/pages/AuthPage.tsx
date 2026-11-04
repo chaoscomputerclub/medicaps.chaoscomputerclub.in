@@ -78,9 +78,17 @@ const INPUT_BASE =
 const LABEL = "block text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 mb-2";
 
 // ─────────────────────────────────────────────
-// Domain guard
+// Email validation and domain helpers
 // ─────────────────────────────────────────────
-function checkIsMedicapsEmail(email: string): boolean {
+function isValidEmail(email: string): boolean {
+  if (!email || !email.includes("@")) return false;
+  const parts = email.split("@");
+  const local = parts[0];
+  const domain = parts[1];
+  return parts.length === 2 && Boolean(local && local.length > 0) && Boolean(domain && domain.includes(".") && domain.length > 3);
+}
+
+function isMedicapsDomain(email: string): boolean {
   if (!email || !email.includes("@")) return false;
   const domain = email.split("@")[1]?.trim().toLowerCase();
   return domain === "medicaps.ac.in" || Boolean(domain?.endsWith(".medicaps.ac.in"));
@@ -111,8 +119,8 @@ export function AuthPage() {
 
   const cleanEmail = email.trim().toLowerCase();
   const hasAt = cleanEmail.includes("@");
-  const typedDomain = hasAt ? cleanEmail.split("@")[1] || "" : "";
-  const isInvalidDomain = hasAt && typedDomain.length > 0 && !checkIsMedicapsEmail(cleanEmail);
+  const isMedicapsDetected = isMedicapsDomain(cleanEmail);
+  const isInvalidEmailFormat = hasAt && ((cleanEmail.split("@")[1]?.length ?? 0) > 2) && !isValidEmail(cleanEmail);
 
   // ── OTP Resend countdown ticker ───────────────────────────────────
   useEffect(() => {
@@ -144,8 +152,8 @@ export function AuthPage() {
         dispatch(
           setMessage(
             rej
-              ? `${rej} is not a Medi-Caps account. Only @medicaps.ac.in emails are permitted.`
-              : "Only official @medicaps.ac.in organization emails are permitted.",
+              ? `Account domain (${rej}) was rejected. Please contact platform administrators.`
+              : "Authentication rejected for this email domain.",
           ),
         );
       } else if (errorParam === "google_cancelled") {
@@ -231,12 +239,8 @@ export function AuthPage() {
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     const clean = email.trim().toLowerCase();
-    if (!clean || !clean.includes("@")) {
-      dispatch(setMessage("Please enter your university email address."));
-      return;
-    }
-    if (!checkIsMedicapsEmail(clean)) {
-      dispatch(setMessage("Only @medicaps.ac.in organization emails are permitted."));
+    if (!clean || !isValidEmail(clean)) {
+      dispatch(setMessage("Please enter a valid email address (personal, academic, or work)."));
       return;
     }
     await dispatch(sendOtpThunk({ email: clean, turnstileToken: turnstileToken || undefined }));
@@ -262,8 +266,8 @@ export function AuthPage() {
 
   async function handleResendOtp() {
     const clean = email.trim().toLowerCase();
-    if (!clean || !checkIsMedicapsEmail(clean)) {
-      dispatch(setMessage("Only @medicaps.ac.in emails are permitted."));
+    if (!clean || !isValidEmail(clean)) {
+      dispatch(setMessage("Please enter a valid email address."));
       return;
     }
     await dispatch(sendOtpThunk({ email: clean, turnstileToken: turnstileToken || undefined }));
@@ -353,26 +357,26 @@ export function AuthPage() {
                 dispatch(setEmail(e.target.value));
                 if (message) dispatch(setMessage(null));
               }}
-              placeholder="Your email address"
+              placeholder="name@domain.com (personal or work)"
               required
               autoFocus
               autoComplete="email"
               className={cn(
                 INPUT_BASE,
-                isInvalidDomain && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
+                isInvalidEmailFormat && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
               )}
             />
 
-            {/* Domain warning */}
-            {isInvalidDomain && (
-              <p className="mt-2 text-xs text-amber-400">
-                Please use your official{" "}
-                <span className="font-medium text-amber-300">@medicaps.ac.in</span> email.
+            {/* University auto-association note */}
+            {isMedicapsDetected && (
+              <p className="mt-2 text-xs text-lime-400 flex items-center gap-1.5">
+                <span>🎓</span>
+                <span>Medi-Caps University workspace will be automatically linked.</span>
               </p>
             )}
 
             {/* General error */}
-            {message && !isInvalidDomain && (
+            {message && (
               <p className="mt-2 text-xs text-red-400 leading-relaxed">{message}</p>
             )}
 
@@ -381,7 +385,7 @@ export function AuthPage() {
               type="submit"
               variant="default"
               size="lg"
-              disabled={pending || isInvalidDomain || !email.trim()}
+              disabled={pending || isInvalidEmailFormat || !email.trim() || !isValidEmail(cleanEmail)}
               className="w-full mt-4 h-11 text-xs font-heading font-extrabold uppercase tracking-wider rounded-[10px] active:scale-[0.98] transition-all"
             >
               {pending ? (
@@ -539,11 +543,11 @@ export function AuthPage() {
             />
           </div>
 
-          {/* Campus handle */}
+          {/* Username / Arena handle */}
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label htmlFor="ob-handle" className={LABEL}>
-                Campus handle
+                Username / Arena handle
               </label>
               <span className="flex items-center gap-1 text-xs">
                 {handleStatus === "checking" && (

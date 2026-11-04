@@ -223,8 +223,8 @@ export function PortalShell() {
         <Link to="/" className="flex items-center gap-2.5 group">
           <img src="/logo.webp" alt="Chaos Computer Club" className="w-7 h-7 object-contain transition-transform duration-150 group-hover:scale-105" />
           <div className="flex flex-col">
-            <span className="font-sans font-bold text-xs tracking-wider text-white leading-none">CCC MEDI-CAPS</span>
-            <span className="font-sans text-[8px] text-zinc-400 tracking-widest mt-0.5">TOURNAMENT ARENA</span>
+            <span className="font-sans font-bold text-xs tracking-wider text-white leading-none">CHAOS ARENA</span>
+            <span className="font-sans text-[8px] text-zinc-400 tracking-widest mt-0.5">COMPETITIVE PLATFORM</span>
           </div>
         </Link>
         <button
@@ -259,12 +259,12 @@ export function PortalShell() {
         >
           <img
             src="/logo.webp"
-            alt="Chaos Computer Club Medi-Caps"
+            alt="Chaos Computer Club"
             className="w-8 h-8 object-contain shrink-0 group-hover:scale-105 transition-transform duration-150"
           />
           <div className="flex flex-col min-w-0">
             <strong className="font-heading text-xs font-bold tracking-wider text-white leading-tight">CHAOS COMPUTER CLUB</strong>
-            <span className="font-heading text-[9px] font-medium text-zinc-400 tracking-wider">MEDI-CAPS CHAPTER</span>
+            <span className="font-heading text-[9px] font-medium text-zinc-400 tracking-wider">COMPETITIVE ARENA</span>
           </div>
         </Link>
 

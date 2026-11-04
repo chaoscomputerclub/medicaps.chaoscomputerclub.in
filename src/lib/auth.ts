@@ -417,6 +417,14 @@ export async function apiFetch<T>(path: string, init?: RequestInit, isRetry = fa
   }
 }
 
+export function isValidEmail(email: string): boolean {
+  if (!email || !email.includes("@")) return false;
+  const parts = email.split("@");
+  const local = parts[0];
+  const domain = parts[1];
+  return parts.length === 2 && Boolean(local && local.length > 0) && Boolean(domain && domain.includes(".") && domain.length > 3);
+}
+
 export function isMedicapsEmail(email: string): boolean {
   if (!email || !email.includes("@")) return false;
   const domain = email.split("@")[1]?.trim().toLowerCase();
@@ -464,7 +472,7 @@ export function getFrontendOrigin(): string {
   if (envUrl && envUrl.trim()) {
     return envUrl.trim().replace(/\/+$/, "");
   }
-  return "https://medicaps.chaoscomputerclub.in";
+  return "https://chaoscomputerclub.in";
 }
 
 // ── Google OAuth ───────────────────────────────────────────────────────────
@@ -646,6 +654,7 @@ export async function getContestRegistrationStatus(
 
 export async function registerForContest(
   slug: string,
+  rulesVersionAccepted: string = "1.0.0",
 ): Promise<{
   status: string;
   registered: boolean;
@@ -656,5 +665,6 @@ export async function registerForContest(
 }> {
   return apiFetch(`/contests/${encodeURIComponent(slug)}/register`, {
     method: "POST",
+    body: JSON.stringify({ rules_version_accepted: rulesVersionAccepted }),
   });
 }

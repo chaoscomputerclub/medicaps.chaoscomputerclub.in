@@ -177,7 +177,7 @@ export function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1 truncate">
-            Welcome back, {greetingName}. Medi-Caps competitive programming arena.
+            Welcome back, {greetingName}. Chaos Computer Club competitive arena.
           </p>
         </div>
       </div>
@@ -185,12 +185,12 @@ export function DashboardPage() {
       {/* Telemetry Bento Strip (4 Columns) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 min-w-0">
         <div className="p-5 rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] hover:border-[#B1FA63]/30 transition-all duration-200 min-w-0 overflow-hidden">
-          <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Campus Standings</span>
+          <span className="block text-xs font-heading font-bold text-zinc-400 uppercase tracking-wider truncate">Platform Standings</span>
           <strong className="block text-3xl sm:text-4xl font-display text-white mt-1 tabular-nums truncate tracking-wide">
             {member?.is_ranked && member?.university_rank ? `#${member.university_rank}` : "Unranked"}
           </strong>
           <span className="block text-xs font-sans text-zinc-500 mt-1 truncate">
-            {member?.is_ranked && member?.standing ? `${member.standing} · Medi-Caps` : "Attend 1 contest to rank"}
+            {member?.is_ranked && member?.standing ? `${member.standing} · Arena` : "Attend 1 contest to rank"}
           </span>
         </div>
 

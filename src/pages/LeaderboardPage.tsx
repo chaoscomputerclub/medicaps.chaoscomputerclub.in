@@ -153,10 +153,10 @@ export function LeaderboardPage() {
       <header className="rounded-[24px] border border-white/[0.08] bg-[#1F1F1F] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-5xl font-display uppercase tracking-wide text-white leading-none">
-            University Leaderboard
+            Platform Leaderboard
           </h1>
           <p className="text-xs sm:text-sm leading-relaxed text-zinc-400 font-sans">
-            Unified standings across Medi-Caps University computing departments.
+            Unified competitive standings and Elo ratings across all divisions and workspaces.
           </p>
         </div>
         <div className="flex flex-col items-start md:items-end justify-center rounded-[16px] border border-white/[0.08] bg-[#171717] p-4 sm:px-5 sm:py-3.5 min-w-[160px] shrink-0">

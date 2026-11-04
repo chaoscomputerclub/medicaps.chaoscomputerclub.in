@@ -255,9 +255,18 @@ export const InterviewReportPage = lazyWithRetry(() => import("./pages/Interview
 export const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"), "ProfilePage");
 export const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"), "SettingsPage");
 export const TermsPage = lazyWithRetry(() => import("./pages/TermsPage"), "TermsPage");
+export const PrivacyPolicyPage = lazyWithRetry(() => import("./pages/PrivacyPolicyPage"), "PrivacyPolicyPage");
+export const ContestRulesPage = lazyWithRetry(() => import("./pages/ContestRulesPage"), "ContestRulesPage");
+export const CodeOfConductPage = lazyWithRetry(() => import("./pages/CodeOfConductPage"), "CodeOfConductPage");
+export const AcceptableUsePage = lazyWithRetry(() => import("./pages/AcceptableUsePage"), "AcceptableUsePage");
 
 export const routePreloaders: Record<string, () => Promise<any>> = {
   "/": () => DashboardPage.preload(),
+  "/terms": () => TermsPage.preload(),
+  "/privacy": () => PrivacyPolicyPage.preload(),
+  "/rules": () => ContestRulesPage.preload(),
+  "/conduct": () => CodeOfConductPage.preload(),
+  "/acceptable-use": () => AcceptableUsePage.preload(),
   "/contests": () => ContestsHubPage.preload(),
   "/practice": () => PracticePage.preload(),
   "/interview": () => InterviewDashboardPage.preload(),
@@ -391,8 +400,40 @@ export function AppRoutes() {
       <Route
         path="/terms"
         element={
-          <Suspense fallback={<div className="min-h-screen bg-[#171717]" />}>
+          <Suspense fallback={<div className="min-h-screen bg-[#070709]" />}>
             <TermsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-[#070709]" />}>
+            <PrivacyPolicyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/rules"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-[#070709]" />}>
+            <ContestRulesPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/conduct"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-[#070709]" />}>
+            <CodeOfConductPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/acceptable-use"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-[#070709]" />}>
+            <AcceptableUsePage />
           </Suspense>
         }
       />

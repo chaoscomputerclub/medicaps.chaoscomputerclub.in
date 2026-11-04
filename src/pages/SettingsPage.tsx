@@ -495,7 +495,7 @@ export function SettingsPage() {
     if (!member) return;
     const data = {
       timestamp: new Date().toISOString(),
-      platform: "CCC Medi-Caps Chapter Portal",
+      platform: "Chaos Computer Club Arena",
       cadet: {
         id: member.id,
         handle: member.handle,
@@ -732,7 +732,7 @@ export function SettingsPage() {
                 <SettingRow
                   label="Full Name"
                   htmlFor="s-fullname"
-                  hint="Your actual human name (e.g. Rahul Sharma). Medi-Caps Google accounts default to your enrollment number, so enter your real name here."
+                  hint="Your display name (e.g. Ada Lovelace). Enter your real name or preferred pseudonym."
                 >
                   <div className="flex gap-2 items-center">
                     <div className="relative flex-1 min-w-0">
@@ -927,7 +927,7 @@ export function SettingsPage() {
               {/* Locked registrations */}
               <SettingSection
                 title="Institutional Registrations"
-                description="Verified by Medi-Caps University. These cannot be changed."
+                description="Verified institutional identity fields. Read-only."
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">

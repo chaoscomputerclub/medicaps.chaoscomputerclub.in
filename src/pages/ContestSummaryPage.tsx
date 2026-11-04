@@ -758,7 +758,7 @@ export function ContestSummaryPage() {
                 </h3>
                 <p className="text-xs text-zinc-300 font-sans leading-relaxed">
                   Your contest solutions have been officially submitted and recorded in the
-                  Medi-Caps Chapter contest ledger. In accordance with the fair competition
+                  Chaos Computer Club contest ledger. In accordance with the fair competition
                   protocol, retakes and further attempts are strictly locked.
                 </p>
               </div>
@@ -841,7 +841,7 @@ export function ContestSummaryPage() {
             Chaos Computer Club Contest Service
           </span>
           <span className="text-zinc-700 hidden sm:inline">•</span>
-          <span>Medi-Caps University Chapter</span>
+          <span>Global Competitive Arena</span>
           <span className="text-zinc-700 hidden sm:inline">•</span>
           <span>Air-Gapped CodeBox Sandbox Node</span>
         </div>

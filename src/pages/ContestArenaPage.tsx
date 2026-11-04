@@ -1488,7 +1488,7 @@ export function ContestArenaPage({ mode }: ContestArenaPageProps = {}) {
               Sign In to Enter Arena
             </h1>
             <p className="text-sm text-zinc-400 font-sans leading-relaxed max-w-sm mt-2 mb-6">
-              You must be signed in with your Medi-Caps cadet account to enter the contest workspace,
+              You must be signed in with your account to enter the contest workspace,
               run test cases, and submit solutions.
             </p>
 
