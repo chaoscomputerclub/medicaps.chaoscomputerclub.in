@@ -1,6 +1,6 @@
 /**
- * Chaos Computer Club India — Medi-Caps Chapter
- * medicaps.chaoscomputerclub.in
+ * Chaos Computer Club — Global Arena
+ * chaoscomputerclub.in
  *
  * Strix-layout × CCC Lime Theme — Production Auth Experience.
  * Strict Redux Toolkit global state management.
@@ -78,7 +78,7 @@ const INPUT_BASE =
 const LABEL = "block text-xs font-heading font-bold uppercase tracking-wider text-zinc-400 mb-2";
 
 // ─────────────────────────────────────────────
-// Email validation and domain helpers
+// Email validation helper
 // ─────────────────────────────────────────────
 function isValidEmail(email: string): boolean {
   if (!email || !email.includes("@")) return false;
@@ -86,12 +86,6 @@ function isValidEmail(email: string): boolean {
   const local = parts[0];
   const domain = parts[1];
   return parts.length === 2 && Boolean(local && local.length > 0) && Boolean(domain && domain.includes(".") && domain.length > 3);
-}
-
-function isMedicapsDomain(email: string): boolean {
-  if (!email || !email.includes("@")) return false;
-  const domain = email.split("@")[1]?.trim().toLowerCase();
-  return domain === "medicaps.ac.in" || Boolean(domain?.endsWith(".medicaps.ac.in"));
 }
 
 // ─────────────────────────────────────────────
@@ -119,7 +113,6 @@ export function AuthPage() {
 
   const cleanEmail = email.trim().toLowerCase();
   const hasAt = cleanEmail.includes("@");
-  const isMedicapsDetected = isMedicapsDomain(cleanEmail);
   const isInvalidEmailFormat = hasAt && ((cleanEmail.split("@")[1]?.length ?? 0) > 2) && !isValidEmail(cleanEmail);
 
   // ── OTP Resend countdown ticker ───────────────────────────────────
@@ -326,7 +319,7 @@ export function AuthPage() {
     );
   } else if (step === "onboarding") {
     layoutTitle = "Complete your profile";
-    layoutSubtitle = "Choose your display name and campus handle.";
+    layoutSubtitle = "Choose your display name and handle.";
     bottomAction = undefined;
   } else {
     layoutTitle = "Sign in";
@@ -357,7 +350,7 @@ export function AuthPage() {
                 dispatch(setEmail(e.target.value));
                 if (message) dispatch(setMessage(null));
               }}
-              placeholder="name@domain.com (personal or work)"
+              placeholder="Your email address"
               required
               autoFocus
               autoComplete="email"
@@ -366,14 +359,6 @@ export function AuthPage() {
                 isInvalidEmailFormat && "border-amber-500/50 focus:border-amber-500/70 focus:ring-0",
               )}
             />
-
-            {/* University auto-association note */}
-            {isMedicapsDetected && (
-              <p className="mt-2 text-xs text-lime-400 flex items-center gap-1.5">
-                <span>🎓</span>
-                <span>Medi-Caps University workspace will be automatically linked.</span>
-              </p>
-            )}
 
             {/* General error */}
             {message && (

@@ -19,8 +19,8 @@ export function CampusPassCard({
     return (
       <article className="campus-pass flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#222]">
         <header className="w-full flex justify-between font-sans text-xs text-zinc-400">
-          <span>CCC / MEDI-CAPS</span>
-          <strong>CAMPUS ACCESS PASS</strong>
+          <span>CHAOS COMPUTER CLUB</span>
+          <strong>ARENA ACCESS PASS</strong>
         </header>
         <div className="my-auto py-10 flex flex-col items-center gap-2">
           <ScanLine size={36} className="text-zinc-500" />
@@ -42,8 +42,8 @@ export function CampusPassCard({
       <div className="pass-cut pass-cut-left" />
       <div className="pass-cut pass-cut-right" />
       <header>
-        <span>CCC / MEDI-CAPS</span>
-        <strong>CAMPUS ACCESS PASS</strong>
+        <span>CHAOS COMPUTER CLUB</span>
+        <strong>ARENA ACCESS PASS</strong>
       </header>
       <div className="pass-body">
         <div>

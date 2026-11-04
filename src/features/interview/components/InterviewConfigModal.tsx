@@ -142,7 +142,7 @@ export function InterviewConfigModal() {
           </div>
           <div>
             <h2 className="text-xl sm:text-2xl font-display uppercase tracking-wide text-white">Configure AI Interview</h2>
-            <p className="text-xs font-sans text-zinc-400">Calibrated against Medi-Caps and high-scale engineering bars</p>
+            <p className="text-xs font-sans text-zinc-400">Calibrated against premier and high-scale engineering bars</p>
           </div>
         </div>
 

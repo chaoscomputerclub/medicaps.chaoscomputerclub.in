@@ -358,7 +358,7 @@ export function SocialDrawer() {
         {/* Footer */}
         <footer className="p-3.5 sm:p-4 border-t border-white/[0.08] bg-[#1F1F1F] text-center">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">
-            AUTHENTICATED CAMPUS SOCIAL GRAPH · MEDI-CAPS CHAPTER
+            AUTHENTICATED CADET SOCIAL GRAPH · CHAOS COMPUTER CLUB
           </p>
         </footer>
       </SheetContent>

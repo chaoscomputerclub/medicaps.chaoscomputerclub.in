@@ -880,7 +880,7 @@ export function ContestsHubPage() {
                               {leader.handle}
                             </p>
                             <p className="truncate font-sans text-[11px] sm:text-xs text-zinc-500 mt-0.5">
-                              {leader.department || "Medi-Caps"} · <span className="text-zinc-400">{leader.tier || "Active"}</span>
+                              {leader.department || "General"} · <span className="text-zinc-400">{leader.tier || "Active"}</span>
                             </p>
                           </div>
                         </div>

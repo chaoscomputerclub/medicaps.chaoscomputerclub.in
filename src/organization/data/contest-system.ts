@@ -175,9 +175,9 @@ function mapBackendContestToRecord(c: any, standings: any[] = []): ContestRecord
     registration_closes_at: c.check_in_opens_at || c.starts_at,
     results_at: c.ends_at,
     eligibility: c.rules?.slice(0, 3) || [
-      "Currently enrolled Medi-Caps University students",
+      "Currently enrolled cadets & members",
       "Individual participation only",
-      "Verified university email required",
+      "Verified account email required",
     ],
     rules: c.rules || [
       "Single workstation, physical air-gapped network.",

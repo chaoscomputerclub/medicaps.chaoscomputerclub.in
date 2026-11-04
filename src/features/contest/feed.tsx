@@ -37,7 +37,7 @@ function eventsFor(contest: ContestSummary): FeedEvent[] {
       kind: "registration",
       at: regOpens,
       title: `${label} — Registration Open`,
-      body: `Registration is open to all Medi-Caps students for ${contest.title}.`,
+      body: `Registration is open to all cadets for ${contest.title}.`,
       slug: contest.slug,
       icon: Flag,
     },
