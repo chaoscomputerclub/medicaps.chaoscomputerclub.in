@@ -19,7 +19,7 @@ Your data is processed strictly to:
 - Provide technical interview practice and performance analytics
 
 ### 3. Data Retention & Sandboxing
-Code submissions are evaluated in ephemeral sandbox environments and stored securely. Source code is never sold or shared with third-party advertisers. Institutional workspaces (e.g. Medi-Caps University) only access contest and assessment data relevant to their registered events.
+Code submissions are evaluated in ephemeral sandbox environments and stored securely. Source code is never sold or shared with third-party advertisers. Institutional workspaces (e.g. affiliated universities or enterprise partners) only access contest and assessment data relevant to their registered events.
 
 ### 4. User Rights
 You have the right to request access to your stored profile data, export your submission history, or request account closure.
