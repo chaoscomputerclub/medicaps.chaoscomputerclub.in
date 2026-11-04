@@ -53,7 +53,7 @@ async def setup_test_cadets():
                 email="open_cadet_test@gmail.com",
                 handle="open_cadet",
                 full_name="Open Cadet",
-                role="STUDENT",
+                is_core_member=False,
                 platform_role="USER",
                 is_onboarded=True,
             )
@@ -68,7 +68,7 @@ async def setup_test_cadets():
                 email="campus_cadet_test@medicaps.ac.in",
                 handle="campus_cadet",
                 full_name="Campus Cadet",
-                role="STUDENT",
+                is_core_member=False,
                 platform_role="USER",
                 is_onboarded=True,
             )
@@ -83,7 +83,7 @@ async def setup_test_cadets():
                 email="platform_admin_test@chaos.org",
                 handle="admin_cadet",
                 full_name="Admin Cadet",
-                role="ADMIN",
+                is_core_member=True,
                 platform_role="PLATFORM_ADMIN",
                 is_onboarded=True,
             )
