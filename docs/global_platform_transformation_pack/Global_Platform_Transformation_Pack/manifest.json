@@ -1,0 +1,12 @@
+{
+  "name": "Global Platform Transformation Pack",
+  "version": "1.0.0",
+  "primary_prompt": "prompts/MASTER_IMPLEMENTATION_PROMPT.md",
+  "documents": [
+    "README.md",
+    "prompts/MASTER_IMPLEMENTATION_PROMPT.md",
+    "architecture/GLOBAL_PLATFORM_TARGET_ARCHITECTURE.md",
+    "migration/DE-MEDICAPS_MIGRATION_PLAN.md",
+    "migration/ACCEPTANCE_AND_RELEASE_CHECKLIST.md"
+  ]
+}
