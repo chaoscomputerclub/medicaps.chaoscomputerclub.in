@@ -1,95 +1,272 @@
+/**
+ * Chaos Computer Club — Global Arena
+ * chaoscomputerclub.in
+ *
+ * Terms of Service — Production Legal Specification.
+ * Minimalist, high-density editorial layout without navigation or decorative graphics.
+ * Copyright (c) 2026 Chaos Computer Club India
+ */
+
 import React from "react";
-import { LegalPolicyPageLayout } from "@/components/legal/LegalPolicyPageLayout";
-
-const DEFAULT_TERMS_CONTENT = `
-# Terms of Service
-
-**Effective Date:** November 4, 2026  
-**Platform Version:** 1.0.0 (Global Edition)  
-**Applicable Domain:** \`chaoscomputerclub.in\` and authorized global endpoints
-
----
-
-### 1. Acceptance of Terms & Global Scope
-Welcome to **Chaos Computer Club Arena** ("Platform", "we", "us", or "our"), operated by the Chaos Computer Club engineering collective. These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "Competitor", "Candidate", or "Administrator") and Chaos Computer Club governing your access to and use of our competitive programming arena, automated judge engines, AI technical interview simulations, community leaderboards, and related APIs.
-
-By registering an account, authenticating via OAuth or one-time verification, accessing our APIs, submitting code to sandboxed judges, participating in tournaments, or undergoing AI technical interview sessions, you acknowledge that you have read, understood, and agree to be bound by these Terms and our companion statutory policies (including our Privacy Policy, Contest Rules, Code of Conduct, and Acceptable Use Policy). If you do not agree with these Terms, you must immediately discontinue use of the Platform.
-
-### 2. User Eligibility & Global Authentication
-1. **Open Global Access:** The Platform is accessible worldwide to students, software engineers, researchers, and technology practitioners of all skill levels. Participation is not restricted by geography, institutional affiliation, or university enrollment.
-2. **Account Types:** Users may register individual accounts using personal, academic, or corporate email domains.
-3. **Single Identity Rule:** Each competitor is entitled to maintain exactly one individual account on the Platform. Creating multiple accounts ("smurfing", "multi-accounting") to manipulate Elo ratings, bypass contest tier restrictions, or harvest contest problem sets is strictly prohibited.
-4. **Credential Security:** You are responsible for maintaining the confidentiality of your session tokens, one-time authentication passcodes, and API credentials. You agree to notify us immediately at \`security@chaoscomputerclub.in\` upon discovering any unauthorized access to your account.
-
-### 3. Sandboxed Execution, CodeBox Engine & Security Boundaries
-1. **Isolated Execution Environment:** All algorithmic solutions, user scripts, and testcase runs execute inside unprivileged, ephemeral execution sandboxes isolated via Linux namespaces, \`cgroups v2\` resource controllers, memory limits, CPU quotas, and \`seccomp-bpf\` syscall filters.
-2. **Prohibited System Operations:** Users agree never to:
-   - Attempt container escape, privilege escalation, or kernel exploitation.
-   - Initiate network egress, socket connections, or external DNS requests from within execution sandboxes.
-   - Execute denial-of-service payloads, fork bombs, or infinite memory exhaustion scripts intended to degrade worker nodes.
-   - Tamper with, hook, or snoop on grading harnesses, judge orchestrators, or hidden testcase data.
-3. **Automated Enforcement:** Any submission detected violating system call limits or exhibiting hostile payloads will result in immediate execution termination, automated security flagging, and account suspension.
-
-### 4. Competitive Integrity, Fair Play & Anti-Cheat Protocol
-1. **Original Work Requirement:** All code submitted during live official rounds, hackathons, and rated contests must represent your own original work authored in real time during the contest window.
-2. **Anti-Collusion & Plagiarism:** You must not copy, transmit, publish, or discuss solutions or partial algorithms with other participants while an active round is underway.
-3. **Automated Tooling & AI Assistance:** Unless explicitly designated as an "AI-augmented" contest, the use of generative AI tools, auto-complete bots, or pre-authored external libraries during active rated rounds is strictly prohibited.
-4. **Algorithmic Auditing:** The Platform employs automated syntax tree (AST) tokenization, semantic similarity analysis, and keystroke/focus telemetry to identify cheating. The Chief Proctor desk and Contest Jury hold final, unappealable authority on all disqualifications, score revocations, and rating adjustments.
-
-### 5. AI Technical Interview Arena & Telemetry
-1. **Adaptive Interview Practice:** The Platform provides AI-driven technical interview simulations featuring voice interaction, dynamic question adaptation, real-time code execution, and rubric-based evaluation.
-2. **Audio & Code Processing:** By initiating an AI interview, you consent to the processing and transcription of your audio input, code edits, and interaction logs solely for the purpose of generating evaluation dossiers and feedback scoring.
-3. **Confidentiality of Candidate Dossiers:** Your detailed interview transcripts, competency heatmaps, and coaching dossiers remain strictly private to your account unless you explicitly choose to share your verified dossier with a prospective employer, recruiter, or organization administrator.
-
-### 6. Organization Workspaces & Institutional Tenancy
-1. **Multi-Tenant Architecture:** Educational institutions, enterprise engineering teams, coding clubs, and developer communities may establish distinct organization workspaces within the Platform.
-2. **Workspace Independence:** An individual user account exists independently of any organization. Joining an organization workspace grants access to that organization's private contests, custom problem sets, and internal leaderboards without relinquishing personal account ownership or global arena ratings.
-3. **Organization Coordinator Duties:** Organization administrators and proctors are responsible for managing internal memberships, supervising internal contests, and enforcing ethical testing standards within their designated workspaces.
-
-### 7. Intellectual Property & Code Licensing
-1. **User Ownership:** You retain full intellectual property ownership and copyright of original algorithms, solution implementations, and code snippets you compose on the Platform.
-2. **Evaluation License to the Platform:** By submitting code to public practice problems, tournaments, or AI interviews, you grant Chaos Computer Club a worldwide, non-exclusive, royalty-free, perpetual license to compile, execute, benchmark, store, and analyze your submissions solely for grading, anti-cheat detection, leaderboard calculation, and platform enhancement.
-3. **Platform Assets:** All Platform trademarks, brand emblems, the Mako mascot design, software architectures, UI components, proprietary judge engines, problem statements, and testcase suites are the exclusive intellectual property of Chaos Computer Club.
-
-### 8. API Fair Use & Automated Access
-1. **Rate Limiting:** Access to Platform REST APIs, SSE event streams, and WebSocket feeds is rate-limited to preserve service stability for all users.
-2. **Scraping Prohibition:** Systematic bulk scraping of problem descriptions, leaderboard data, or participant profiles via automated crawlers or headless browsers without prior written authorization is strictly prohibited.
-
-### 9. Disclaimer of Warranties
-THE PLATFORM, EXECUTION ENGINES, PROBLEM SETS, AND AI INTERVIEWS ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DO NOT GUARANTEE UNINTERRUPTED AVAILABILITY, ZERO LATENCY DURING CONTEST COUNTDOWNS, OR FLAWLESS SUBMISSION JUDGING UNDER ADVERSE NETWORK CONDITIONS.
-
-### 10. Limitation of Liability
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, CHAOS COMPUTER CLUB, ITS DIRECTORS, MAINTAINERS, PROCTORS, AND AFFILIATES SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, DATA, USE, GOODWILL, OR CONTEST RATINGS, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF OR INABILITY TO USE THE PLATFORM.
-
-### 11. Suspension, Termination & Rating Forfeiture
-We reserve the right to suspend, terminate, or restrict access to any account, with or without prior notice, in the event of:
-- Breach of these Terms, the Acceptable Use Policy, or Contest Integrity rules.
-- Malicious cyber attacks, unauthorized probing, or deliberate platform degradation.
-- Documented academic dishonesty, solution leakage, or harassment of community members.
-Upon termination for cause, all accumulated Elo ratings, badges, and contest standings may be permanently forfeited.
-
-### 12. Policy Versioning, Consent & Modifications
-1. **Version Tracking:** Material amendments to these Terms will be published with an updated version number and effective date.
-2. **Immutable Consent Ledger:** User acceptance of revised terms is cryptographically recorded in an immutable database ledger with timestamp, user ID, IP address, and client user-agent.
-3. **Continued Use:** Your continued use of the Platform following the publication of revised terms constitutes acceptance of the updated Terms.
-
-### 13. Governing Law & Contact Information
-These Terms shall be governed by and construed in accordance with standard international commercial law principles. For inquiries regarding these Terms, policy enforcement, or corporate workspaces, contact the platform administration at:
-
-- **Legal Inquiries:** \`legal@chaoscomputerclub.in\`
-- **Security & Vulnerability Reports:** \`security@chaoscomputerclub.in\`
-- **General Support:** \`support@chaoscomputerclub.in\`
-- **Web Portal:** \`https://chaoscomputerclub.in\`
-`;
+import { Link } from "react-router-dom";
 
 export function TermsPage() {
   return (
-    <LegalPolicyPageLayout
-      policyType="TERMS_OF_SERVICE"
-      defaultTitle="Platform Terms of Service"
-      defaultVersion="1.0.0"
-      defaultContent={DEFAULT_TERMS_CONTENT}
-    />
+    <main className="min-h-screen w-full bg-[#171717] text-zinc-300 antialiased selection:bg-[#B1FA63]/30 selection:text-white font-sans">
+      <div className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
+        {/* Centered Application Logo */}
+        <div className="flex justify-center mb-10">
+          <Link
+            to="/"
+            className="inline-flex transition-opacity hover:opacity-80"
+            aria-label="Chaos Computer Club Home"
+          >
+            <img
+              src="/logo.webp"
+              alt="Chaos Computer Club"
+              className="h-11 w-11 object-contain"
+            />
+          </Link>
+        </div>
+
+        {/* Document Header */}
+        <header className="border-b border-white/[0.08] pb-8 text-center sm:text-left">
+          <h1 className="text-3xl font-heading font-bold tracking-tight text-white sm:text-4xl">
+            Terms of Service
+          </h1>
+          <p className="mt-3 text-sm text-zinc-400">
+            Chaos Computer Club — Global Arena Platform
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-400">
+            <span>Effective Date: November 2026</span>
+            <span>•</span>
+            <span>Applies globally: chaoscomputerclub.in</span>
+          </div>
+        </header>
+
+        {/* Content Body */}
+        <div className="mt-10 space-y-12 text-[15px] leading-relaxed text-zinc-300">
+          {/* Section 1 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              1. Purpose and Acceptance
+            </h2>
+            <p className="mt-3">
+              These Terms of Service (&ldquo;Terms&rdquo;) govern access to and use of the competitive programming arena,
+              cybersecurity challenge infrastructure, AI technical interview simulations, and developer assessment platform hosted at{" "}
+              <span className="font-sans text-xs text-zinc-200">chaoscomputerclub.in</span> (and authorized regional endpoints),
+              operated by Chaos Computer Club (&ldquo;CCC&rdquo;, &ldquo;we&rdquo;, &ldquo;our&rdquo;).
+            </p>
+            <p className="mt-3">
+              By accessing the platform, creating an account via email verification, signing in through Google OAuth,
+              or executing code against our automated judging engines, you agree to be bound by these Terms. If you do not
+              agree, you must discontinue using the platform immediately.
+            </p>
+          </section>
+
+          {/* Section 2 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              2. Eligibility &amp; Global Account Scope
+            </h2>
+            <p className="mt-3">
+              The platform is open globally to all software engineers, university students, researchers, and technology
+              practitioners. Access to public practice problems, algorithmic arenas, ratings, and open tournaments is not
+              restricted by geographical borders or institutional enrollment.
+            </p>
+            <ul className="mt-3 list-inside list-disc space-y-2 text-zinc-400">
+              <li>
+                <strong className="text-zinc-200">Universal Authentication:</strong> Account registration supports personal,
+                academic, and corporate email addresses. Verified email ownership is required for all contest registrations.
+              </li>
+              <li>
+                <strong className="text-zinc-200">Single Identity Rule:</strong> Each participant is permitted exactly
+                one individual account on the platform. Operating multiple handles (&ldquo;smurfing&rdquo; or &ldquo;Sybil accounts&rdquo;)
+                to bypass rating boundaries, manipulate contest divisions, or harvest challenge sets is strictly forbidden.
+              </li>
+              <li>
+                <strong className="text-zinc-200">Account Security:</strong> You are responsible for safeguarding your
+                credentials, authentication tokens, and session integrity. Transferring accounts or sharing login keys is prohibited.
+              </li>
+            </ul>
+          </section>
+
+          {/* Section 3 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              3. Organization Workspaces &amp; Multi-Tenancy
+            </h2>
+            <p className="mt-3">
+              Educational institutions, enterprise engineering departments, coding clubs, and hackathon organizers may
+              maintain specialized organization workspaces on the platform.
+            </p>
+            <ul className="mt-3 list-inside list-disc space-y-2 text-zinc-400">
+              <li>
+                <strong className="text-zinc-200">Workspace Independence:</strong> An individual user account exists
+                independently of any organization. Joining an organization workspace grants access to that organization&rsquo;s
+                private challenges and custom problem sets without relinquishing global account ownership or personal ratings.
+              </li>
+              <li>
+                <strong className="text-zinc-200">Coordinator Responsibilities:</strong> Organization administrators and proctors
+                are responsible for managing internal memberships, configuring private contest rules, and upholding ethical testing standards.
+              </li>
+            </ul>
+          </section>
+
+          {/* Section 4 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              4. Competition Integrity &amp; Code of Conduct
+            </h2>
+            <p className="mt-3">
+              The platform evaluates algorithmic proficiency and security problem-solving. To maintain global
+              standards and fair evaluation, participants must adhere strictly to fair play guidelines:
+            </p>
+            <div className="mt-4 rounded-[16px] border border-white/[0.08] bg-[#171717] p-5 sm:p-6">
+              <h3 className="text-sm font-medium text-white">Prohibited Actions:</h3>
+              <ul className="mt-2.5 list-inside list-disc space-y-2 text-xs leading-normal text-zinc-400">
+                <li>
+                  <strong className="text-zinc-300">Collusion &amp; Plagiarism:</strong> Sharing source code, solutions,
+                  or approach hints with other participants during active contest windows.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">Generative AI Assistance:</strong> Utilizing automated AI copilots,
+                  large language models, or external code generators during restricted rated rounds unless explicitly authorized.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">Multiple Submissions Abuse:</strong> Flooding the judge queue with
+                  denial-of-service attempts, fork bombs, or automated submission scripts.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">Sybil Attacks:</strong> Registering alternate handles to probe hidden
+                  test cases, reserve leaderboard slots, or distort Elo rating algorithms.
+                </li>
+              </ul>
+            </div>
+            <p className="mt-3 text-sm text-zinc-400">
+              All submissions are subject to automated abstract syntax tree (AST) similarity detection algorithms and post-contest
+              telemetry audits. Decisions of the Chief Proctor and Contest Jury regarding disqualifications are final.
+            </p>
+          </section>
+
+          {/* Section 5 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              5. Code Execution &amp; Sandbox Security
+            </h2>
+            <p className="mt-3">
+              Code submitted through the Monaco Web IDE is compiled and executed within isolated, resource-constrained
+              Linux namespaces, cgroups v2, and seccomp-bpf container sandboxes. You expressly agree not to:
+            </p>
+            <ul className="mt-3 list-inside list-disc space-y-2 text-zinc-400">
+              <li>Attempt to escape or probe containerized namespaces, cgroups, or virtual file systems.</li>
+              <li>Spawn background daemons, fork bombs, or cryptomining processes.</li>
+              <li>Initiate unauthorized outbound network connections from inside the judge execution runtime.</li>
+              <li>Exfiltrate hidden test cases, judge binaries, or system environment configurations.</li>
+            </ul>
+            <p className="mt-3 text-sm text-zinc-400">
+              Security vulnerability research must be conducted responsibly under CCC disclosure guidelines; unauthorized
+              destructive exploitation will result in immediate disqualification and account suspension.
+            </p>
+          </section>
+
+          {/* Section 6 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              6. AI Technical Interview Arena &amp; Telemetry
+            </h2>
+            <p className="mt-3">
+              The platform provides adaptive AI-driven technical interview simulations featuring interactive voice dialogue,
+              real-time algorithmic challenges, and multi-dimensional rubric scoring.
+            </p>
+            <p className="mt-3">
+              By initiating an AI interview, you consent to the processing of your audio stream, live code modifications,
+              and problem-solving transcripts solely to generate performance evaluation reports and coaching dossiers.
+              Detailed candidate dossiers remain strictly private to your account unless you explicitly choose to export or share them.
+            </p>
+          </section>
+
+          {/* Section 7 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              7. Intellectual Property &amp; Submissions
+            </h2>
+            <p className="mt-3">
+              You retain full ownership and copyright of the original source code and algorithmic implementations you write.
+              By submitting solutions through the platform, you grant Chaos Computer Club a non-exclusive, worldwide,
+              royalty-free license to store, compile, run, benchmark, and analyze your code solely for judging, plagiarism evaluation,
+              and leaderboard ranking.
+            </p>
+            <p className="mt-3">
+              Problem statements, editorial analyses, testcase suites, platform source code, Mako mascot assets, and branding
+              elements remain the exclusive intellectual property of Chaos Computer Club and respective challenge authors.
+            </p>
+          </section>
+
+          {/* Section 8 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              8. Disciplinary Enforcement &amp; Termination
+            </h2>
+            <p className="mt-3">
+              We reserve the right to investigate suspicious activity and take immediate corrective measures at our sole
+              discretion, including:
+            </p>
+            <ul className="mt-3 list-inside list-disc space-y-1.5 text-zinc-400">
+              <li>Disqualification from current and upcoming competitive contests.</li>
+              <li>Elo rating resets or permanent exclusion from global leaderboard indices.</li>
+              <li>Revocation of platform authentication tokens and account suspension.</li>
+              <li>Permanent forfeiture of earned credentials and tournament qualification passes.</li>
+            </ul>
+          </section>
+
+          {/* Section 9 */}
+          <section>
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              9. Service Availability &amp; Disclaimer
+            </h2>
+            <p className="mt-3">
+              The platform is provided on an &ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo; basis without warranties of
+              any kind. While we strive for high uptime during competitive contest windows, we are not liable for client-side
+              network instabilities, local browser errors, or unscheduled upstream cloud interruptions.
+            </p>
+          </section>
+
+          {/* Section 10 */}
+          <section className="border-t border-white/[0.08] pt-8">
+            <h2 className="text-lg font-semibold tracking-tight text-white">
+              10. Contact &amp; Governance
+            </h2>
+            <p className="mt-3">
+              Questions regarding these Terms, contest rules, or appeals may be directed to Platform Governance:
+            </p>
+            <div className="mt-4 rounded-[16px] border border-white/[0.08] bg-[#171717] p-5 sm:p-6 text-sm text-zinc-300">
+              <p className="font-medium text-white">Chaos Computer Club — Global Arena</p>
+              <p className="mt-1 text-zinc-400">Global Engineering Collective &amp; Platform Administration</p>
+              <p className="mt-2 font-sans text-xs text-lime-400">
+                Email:{" "}
+                <a
+                  href={`mailto:${(import.meta.env["VITE_CONTACT_EMAIL"] as string) || "legal@chaoscomputerclub.in"}`}
+                  className="underline underline-offset-4 transition-colors hover:text-lime-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-400"
+                >
+                  {(import.meta.env["VITE_CONTACT_EMAIL"] as string) || "legal@chaoscomputerclub.in"}
+                </a>
+              </p>
+            </div>
+          </section>
+        </div>
+
+        {/* Minimal Bottom Return Action */}
+        <footer className="mt-16 border-t border-white/[0.08] pt-8 text-center sm:text-left">
+          <Link
+            to="/auth"
+            className="inline-flex text-xs text-zinc-400 transition-colors hover:text-white"
+          >
+            ← Back to Sign In
+          </Link>
+        </footer>
+      </div>
+    </main>
   );
 }
 
